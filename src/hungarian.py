@@ -1,7 +1,8 @@
+import subprocess
+
 from typing import List, Tuple
 
 from src.helpers.input_handler import read_input
-
 from src.models.graph import Graph, Node, Edge
 from src.models.matching import Matching
 
@@ -237,3 +238,17 @@ def run_hungarian(input_file) -> Matching:
             break
     
     return M
+def execute_exe_hungarian(N, K, input_file, output_file):
+    try:
+        subprocess.run(f"Hungarian_64.exe {input_file} {output_file}")
+        return
+    except Exception as e:
+        print(f"{e}")
+
+    try:
+        subprocess.run(f"Hungarian_32.exe {input_file} {output_file}")
+        return
+    except Exception as e:
+        print(f"{e}")
+
+    print("Both Hungarian executables failed.")
