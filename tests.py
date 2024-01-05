@@ -1,11 +1,12 @@
-import timeit
 import os
+import timeit
 import numpy as np
 
 from src.helpers.input_handler import generate_input
+from src.helpers.output_handler import write_to_output
 from src.helpers.plot import save_output, save_time_complexity
 
-EXE = True
+EXE = False
 
 def test_hungarian(n, k, input_file, output_file):
     if EXE:
@@ -42,24 +43,28 @@ def main():
         ])
     n, k = 2, 2
     graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(graph, matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     # 3x2
     n, k = 3, 2
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(graph, matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     # 2x4
     n, k = 2, 4
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(graph, matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     # 4x3
     n, k = 4, 3
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(graph, matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     # benchmarking
