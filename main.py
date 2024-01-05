@@ -11,7 +11,7 @@ def main():
     args = parse_arguments()
     selected_mode = ApplicationMode.from_str(args.mode)
 
-    selected_mode = ApplicationMode.GENERATE_AND_RUN
+    # selected_mode = ApplicationMode.GENERATE_AND_RUN
 
     if selected_mode == ApplicationMode.GENERATE_INPUT:
         generate_input(args.n, args.k, args.input_file)
@@ -36,7 +36,8 @@ def main():
                 )
                 measurements[n-1, k-1] = measurement * 100
 
-        display_time_complexity(args.n, args.k, measurements, logarithmic=True)
+        display_time_complexity(args.n, args.k, measurements, 1/2000, logarithmic=False)
+        display_time_complexity(args.n, args.k, measurements, 1/2000, logarithmic=True)
 
 if __name__ == "__main__":
     main()
