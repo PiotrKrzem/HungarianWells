@@ -2,16 +2,16 @@ import argparse
 from enum import Enum, auto
 
 class ApplicationMode(str, Enum):
-    GENERATE_INPUT = auto()
-    GENERATE_AND_RUN = auto()
-    READ_INPUT = auto()
-    BENCHMARK = auto()
+    GENERATE_INPUT = "GENERATE_INPUT"
+    GENERATE_AND_RUN = "GENERATE_AND_RUN"
+    READ_INPUT = "READ_INPUT"
+    BENCHMARK = "BENCHMARK"
 
     @staticmethod
     def from_str(label):
         label_map = {
             ApplicationMode.GENERATE_INPUT.value: ApplicationMode.GENERATE_INPUT,
-            ApplicationMode.GENERATE_AND_RUN.value: ApplicationMode.GENERATE_INPUT,
+            ApplicationMode.GENERATE_AND_RUN.value: ApplicationMode.GENERATE_AND_RUN,
             ApplicationMode.READ_INPUT.value: ApplicationMode.READ_INPUT,
             ApplicationMode.BENCHMARK.value: ApplicationMode.BENCHMARK,
         }
