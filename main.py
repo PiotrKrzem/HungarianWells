@@ -39,7 +39,8 @@ def main():
                 )
                 measurements[n-1, k-1] = measurement * 100
 
-        display_time_complexity(args.n, args.k, measurements, logarithmic=True)
+        display_time_complexity(args.n, args.k, measurements, 1/2000, logarithmic=False)
+        display_time_complexity(args.n, args.k, measurements, 1/2000, logarithmic=True)
 
 if __name__ == "__main__":
     main()
