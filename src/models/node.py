@@ -1,7 +1,7 @@
 import numpy as np
-
-from src.models.edge import Edge
 from typing import List
+
+class Edge: pass # to avoid circular dependency
 
 class Node():
     '''
@@ -42,3 +42,5 @@ class Node():
         Returns: list of edges' weights
         '''
         return [edge.weight for edge in self.edges]
+
+from src.models.edge import Edge
