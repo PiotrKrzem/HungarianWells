@@ -1,3 +1,5 @@
+import subprocess
+
 from src.models.graph import Graph
 from src.models.matching import Matching
 
@@ -66,4 +68,17 @@ def find_augmenting_path(equality_graph: Graph, matching: Matching) -> Graph:
     
     return equality_graph
 
-    
+def execute_exe_hungarian(N, K, input_file, output_file):
+    try:
+        subprocess.run(f"Hungarian_64.exe {input_file} {output_file}")
+        return
+    except Exception as e:
+        print(f"{e}")
+
+    try:
+        subprocess.run(f"Hungarian_32.exe {input_file} {output_file}")
+        return
+    except Exception as e:
+        print(f"{e}")
+
+    print("Both Hungarian executables failed.")
