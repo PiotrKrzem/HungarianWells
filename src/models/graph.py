@@ -1,4 +1,6 @@
 import numpy as np
+import copy
+import math
 
 from typing import List
 
@@ -32,7 +34,7 @@ class Node():
 
         Return: euclidean distance between two points
         '''
-        return np.linalg.norm([self.x, self.y], [node.x, node.y])
+        return math.dist([self.x, self.y], [node.x, node.y])
     
     def get_weights_of_edges(self) -> List[float]:
         '''
@@ -81,9 +83,7 @@ class Graph():
         self.k = k
         self.wells = [Node(coordinates, idx) for idx, coordinates in enumerate(wells)]
         self.houses = [Node(coordinates, idx) for idx, coordinates in enumerate(houses)]
-
-        if not empty_edges:
-            self.edges = self.construct_edges(self.wells)
+        self.edges: List[Edge] = self.construct_edges(self.wells) if not empty_edges else []
 
     @classmethod
     def create_from_nodes(cls,
@@ -116,6 +116,7 @@ class Graph():
         Returns: List of edges where each edge is described by the 3-element tuple (well_idx, house_idx, distance)
         '''
         edges = []
+
         for well in wells:
             for house in self.houses:
                 distance = well.compute_distance(house)
@@ -124,13 +125,3 @@ class Graph():
                 house.edges.append(edge)
                 well.edges.append(edge)
         return edges
-    
-    def duplicate_wells(self):
-        '''
-        Method duplicates a set of wells and adds corresponding edges.
-        '''
-        wells = self.wells
-
-        for _ in range(0, self.k - 1):
-            self.wells.append(wells)
-            self.edges.append(self.construct_edges(wells))

@@ -1,4 +1,4 @@
-import subprocess
+import copy
 
 from typing import List, Tuple
 
@@ -15,8 +15,8 @@ def duplicate_wells(graph: Graph) -> Graph:
 
     Returns: graph with duplicated wells
     '''
-    graph_copy = Graph.create_from_nodes(graph.n, graph.k, graph.wells, graph.houses)
-    graph_copy.duplicate_wells()
+    duplicate_wells = [copy.deepcopy(well) for well in graph.wells for _ in range(graph.k)]
+    graph_copy = Graph.create_from_nodes(graph.n * graph.k, graph.k, duplicate_wells, graph.houses)
 
     return graph_copy
 
@@ -26,11 +26,9 @@ def initial_labeling(graph: Graph) -> Graph:
 
     Returns: method returns graph with initialized labels.
     '''
-    kn = graph.k * graph.n
-
-    for i in range(0, kn):
-        graph.houses[i].label = max(graph.houses[i].get_weights_of_edges())
+    for i in range(graph.n):
         graph.wells[i].label = 0
+        graph.houses[i].label = max(graph.houses[i].get_weights_of_edges())
     
     return graph
 
@@ -40,15 +38,15 @@ def equality_graph(graph: Graph) -> Graph:
 
     Returns: initialized equality graph.
     '''
-    kn = graph.k * graph.n
-    equality_graph: Graph = Graph.create_from_coords(graph.n, graph.k, graph.wells, graph.houses)
+    equality_graph: Graph = Graph.create_from_nodes(graph.n, graph.k, graph.wells, graph.houses, True)
 
-    for i in range(0, kn**2):
+    for i in range(0, graph.n**2):
         edge = graph.edges[i]
         if edge.weight == edge.src.label + edge.dst.label:
-            equality_graph.edges.append(edge)
-            equality_graph.houses[edge.src.idx].edges.append(edge)
-            equality_graph.wells[edge.dst.idx].edges.append(edge)
+            edge_copy = Edge(equality_graph.houses[edge.src.idx], equality_graph.wells[edge.dst.idx], edge.weight)
+            equality_graph.edges.append(edge_copy)
+            equality_graph.houses[edge.src.idx].edges.append(edge_copy)
+            equality_graph.wells[edge.dst.idx].edges.append(edge_copy)
     
     return equality_graph
 
@@ -62,7 +60,7 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
 
     Returns: list of alternating paths
     '''
-    visited = {node: False for node in graph.wells + graph.houses}
+    visited = { node: False for node in graph.wells + graph.houses }
     queue = [(starting_node, [starting_node])]
     alternating_paths = []
 
@@ -73,7 +71,7 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
         if len(path) >= 2:
             alternating_paths.append(path)
         
-        adj_nodes = [edge.dst if current in graph.wells else edge.src for edge in current.edges]
+        adj_nodes = [edge.src if current in graph.wells else edge.dst for edge in current.edges]
         for neighbor in adj_nodes:
             if not visited[neighbor]:
                 queue.append((neighbor, path + [neighbor]))
@@ -91,6 +89,9 @@ def is_augmenting(path: List[Node], matching: Matching):
 
     Returns: boolean indicating if path is augmenting
     '''
+    if len(matching.edges) == 0:
+        return False
+    
     return not (matching.edges[0].src == path[0] or matching.edges[-1].dst == path[-1])
     
 
@@ -104,19 +105,17 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], 
 
     Returns: (alternating path, boolean indicating if path is augmenting)
     '''
-    kn = graph.k * graph.n
-    
-    for i in range(0, kn):
+    for i in range(graph.n):
         if not matching.contains_any(graph.houses[i].edges):
             starting_node = graph.houses[i]
             for p in find_alternating_paths(graph, starting_node):
-                if is_augmenting(p):
+                if is_augmenting(p, matching):
                     return p, True
             return p, False
     
     return [], False
 
-def label_modification(graph: Graph, path: List[Node]) -> Graph:
+def label_modification(graph: Graph, path: List[int]) -> Graph:
     '''
     Method performs labels modification.
 
@@ -126,31 +125,29 @@ def label_modification(graph: Graph, path: List[Node]) -> Graph:
 
     Returns: graph with modified labels
     '''
-    S: List[Node] = []
-    W_minus_T = graph.wells
-
     houses_in_path = path[::2]
     wells_in_path = path[1::2]
 
-    for house in houses_in_path:
-        S.append(house)
-    for well in wells_in_path:
-        W_minus_T.remove(well)
+    S: List[Node] = []
+    W_minus_T = [w.idx for w in graph.wells if w.idx not in wells_in_path]
+
+    for house in graph.houses:
+        if house.idx in houses_in_path:
+            S.append(house.idx)
 
     deltas = []
     for edge in graph.edges:
-        if edge.src in S and edge.dst in W_minus_T:
+        if edge.src.idx in S and edge.dst.idx in W_minus_T:
             deltas.append(edge.src.label + edge.dst.label - edge.weight)
 
     min_delta = min(deltas)
 
-# TU SPRAWDZ
     for house in graph.houses:
-        if house in S:
+        if house.idx in S:
             edge.weight += min_delta
 
     for well in graph.wells:
-        if well in wells_in_path:
+        if well.idx in wells_in_path:
             edge.weight -= min_delta
 
     return graph
@@ -213,21 +210,22 @@ def run_hungarian(input_file) -> Tuple[Graph, Matching]:
     M = Matching()
 
     # Step 2: Duplicate wells
-    graph = duplicate_wells(graph)
+    duplicate_graph = duplicate_wells(graph)
 
     # Step 3: Initial feasible labeling
-    graph = initial_labeling(graph)
+    duplicate_graph = initial_labeling(duplicate_graph)
 
     while True:
         # Step 4: Construct equality graph
-        graph_l = equality_graph(graph)
+        graph_l = equality_graph(duplicate_graph)
 
         # Step 5: Construct augmenting path
-        path, is_augmenting = find_alternating_paths(graph_l, M)
+        path, is_augmenting = find_augmenting_path(graph_l, M)
 
         if not is_augmenting:
             # Step 6: Label modification
-            graph = label_modification(equality_graph, path)
+            path_with_idx = [node.idx for node in path]
+            duplicate_graph = label_modification(duplicate_graph, path_with_idx)
             continue
 
         # Step 7: Matching modification
