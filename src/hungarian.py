@@ -28,7 +28,7 @@ def initial_labeling(graph: Graph) -> Graph:
     '''
     for i in range(graph.n):
         graph.wells[i].label = 0
-        graph.houses[i].label = max(graph.houses[i].get_weights_of_edges())
+        graph.houses[i].label = min(graph.houses[i].get_weights_of_edges())
     
     return graph
 
@@ -67,15 +67,15 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
     while queue:
         current, path = queue.pop(0)
         visited[current] = True
-
-        if len(path) >= 2:
-            alternating_paths.append(path)
         
         adj_nodes = [edge.src if current in graph.wells else edge.dst for edge in current.edges]
         for neighbor in adj_nodes:
             if not visited[neighbor]:
                 queue.append((neighbor, path + [neighbor]))
                 visited[neighbor] = True
+
+        if len(path) >= 2:
+            alternating_paths.append(path)
     
     return alternating_paths
 
