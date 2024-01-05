@@ -15,7 +15,7 @@ def duplicate_wells(graph: Graph) -> Graph:
 
     Returns: graph with duplicated wells
     '''
-    graph_copy = Graph(graph.n, graph.k, graph.wells, graph.houses)
+    graph_copy = Graph.create_from_nodes(graph.n, graph.k, graph.wells, graph.houses)
     graph_copy.duplicate_wells()
 
     return graph_copy

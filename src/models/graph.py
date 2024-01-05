@@ -86,22 +86,24 @@ class Graph():
             self.edges = self.construct_edges(self.wells)
 
     @classmethod
-    def create_from_coords(cls, 
-                           n: int, 
-                           k: int,
-                           wells: List[Node], 
-                           houses: List[Node]):
+    def create_from_nodes(cls,
+                          n: int,
+                          k: int,
+                          wells: List[Node],
+                          houses: List[Node],
+                          empty_edges: bool = False):
         '''
         Parameters:
         n - number of wells
         k - number of houses per well
         wells - list of well nodes
         houses - list of house nodes
+        empty_edges - flag indicating if the graph should be initialized without edges
         '''
         wells_coords = [[well.x, well.y] for well in wells]
         houses_coords = [[house.x, house.y] for house in houses]
 
-        return cls(n, k, wells_coords, houses_coords, True)
+        return cls(n, k, wells_coords, houses_coords, empty_edges)
 
     def construct_edges(self, wells: List[Node]) -> List[Edge]:
         '''
