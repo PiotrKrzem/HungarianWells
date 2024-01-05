@@ -1,5 +1,5 @@
 from typing import List
-from src.models.edge import Edge
+from src.models.graph import Edge, Node
 
 class Matching():
     '''
@@ -26,3 +26,33 @@ class Matching():
                 return True
             
         return False
+    
+    def contains_edge(self, src: Node, dst: Node) -> bool:
+        '''
+        Method verifies if the edge of the given source and destination is in the set of edges.
+
+        Parameters:
+        src - source node
+        dst - destination node
+
+        Returns: boolean indicating if given edge is within matching
+        '''
+        for edge in self.edges:
+            if edge.src == src and edge.dst == dst:
+                return True
+            
+        return False
+    
+    def remove_edge(self, src: Node, dst: Node) -> None:
+        '''
+        Method removes edge of given source and destination.
+
+        Parameters:
+        src - source node
+        dst - destination node
+        '''
+        edges = self.edges
+        for edge in edges:
+            if edge.src == src and edge.dst == dst:
+                self.edges.remove(edge)
+                return
