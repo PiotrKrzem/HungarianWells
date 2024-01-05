@@ -6,9 +6,9 @@ from src.helpers.input_handler import generate_input
 from src.helpers.output_handler import write_to_output
 from src.helpers.plot import save_output, save_time_complexity
 
-EXE = False
-
 def test_hungarian(n, k, input_file, output_file):
+    EXE = False
+
     if EXE:
         import subprocess
         class Tmp:
