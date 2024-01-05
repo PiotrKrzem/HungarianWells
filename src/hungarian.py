@@ -197,7 +197,7 @@ def optimal_assignment_check(graph: Graph, matching: Matching) -> bool:
     return True
 
 
-def run_hungarian(input_file) -> Matching:
+def run_hungarian(input_file) -> Tuple[Graph, Matching]:
     '''
     Method runs full hungarian algorithm for given input file.
 
@@ -237,18 +237,4 @@ def run_hungarian(input_file) -> Matching:
         if optimal_assignment_check(graph_l, M):
             break
     
-    return M
-def execute_exe_hungarian(N, K, input_file, output_file):
-    try:
-        subprocess.run(f"Hungarian_64.exe {input_file} {output_file}")
-        return
-    except Exception as e:
-        print(f"{e}")
-
-    try:
-        subprocess.run(f"Hungarian_32.exe {input_file} {output_file}")
-        return
-    except Exception as e:
-        print(f"{e}")
-
-    print("Both Hungarian executables failed.")
+    return graph, M
