@@ -20,7 +20,7 @@ def exponential_cmap(base_cmap=None, colors_count = 256):
 def log_tick_formatter(val, pos=None):
     return f"$10^{{{int(val)}}}$"
 
-def display_time_complexity(n, k, measurements_grid, C = 1/100, logarithmic = False):
+def create_time_complexity_plot(n, k, measurements_grid, C = 1/2000, logarithmic = False):
     # Make data
     N = np.arange(1, n + 1, 1) + 10e-5
     K = np.arange(1, k + 1, 1) + 10e-5
@@ -30,7 +30,6 @@ def display_time_complexity(n, k, measurements_grid, C = 1/100, logarithmic = Fa
     T = C * np.power(T, 4)
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    fig.suptitle('Time Complexity')
 
     ax.set_xlabel('N')
     ax.set_ylabel('K')
@@ -57,9 +56,7 @@ def display_time_complexity(n, k, measurements_grid, C = 1/100, logarithmic = Fa
 
         ax.set_zlabel('Time, logarithmic (s)')
 
-    plt.show()
-
-def display_output(n, k, output_file):
+def create_output_plot(n, k, output_file):
     pattern_string = r'(\w+)\(([\d.]+),([\d.]+)\) -> ' + ','.join([r'(\w+)\(([\d.]+),([\d.]+)\)'] * k)
     pattern = re.compile(pattern_string)
 
@@ -127,11 +124,37 @@ def display_output(n, k, output_file):
                 break
 
     plt.tight_layout()
+
+def display_time_complexity(n, k, measurements_grid, C = 1/2000, logarithmic = False):
+    create_time_complexity_plot(n, k, measurements_grid, C, logarithmic)
+    plt.show()
+
+def save_time_complexity(n, k, measurements_grid, output_plot, C, logarithmic):
+    create_time_complexity_plot(n, k, measurements_grid, C, logarithmic)
+    plt.savefig(output_plot, format='png')
+    plt.close()
+
+def save_output(n, k, output_file, output_plot):
+    create_output_plot(n, k, output_file)
+    plt.savefig(output_plot, format='png')
+    plt.close()
+
+def display_output(n, k, output_file):
+    create_output_plot(n, k, output_file)
     plt.show()
 
 
 if __name__ == "__main__":
     n = 5
     k = 5
-    display_time_complexity(n, k, (np.arange(1, n*k + 1, 1) + 10e-5).reshape((n,k)), logarithmic=False)
-    display_time_complexity(n, k, (np.arange(1, n*k + 1, 1) + 10e-5).reshape((n,k)), logarithmic=True)
+    C = 1/3467
+
+    N = np.arange(1, n + 1, 1) + 10e-5
+    K = np.arange(1, k + 1, 1) + 10e-5
+    N, K = np.meshgrid(N, K)
+
+    T = np.multiply(N, K) 
+    T = C * np.power(T, 4) + np.random.rand(n, k) * 0.1
+
+    display_time_complexity(n, k, T, logarithmic=False)
+    display_time_complexity(n, k, T, logarithmic=True)
