@@ -3,7 +3,7 @@ import numpy as np
 
 from src.models.graph import Graph
 
-def generate_input(N, K, input_file, save_to_file = True) -> Graph:
+def generate_input(N, K, input_file, save_to_file = True) -> None:
     '''
     Method generates sample input for N wells and K*N houses
 
@@ -25,11 +25,6 @@ def generate_input(N, K, input_file, save_to_file = True) -> Graph:
                 file.write(f"{round(x_well[i], 2)},{round(y_well[i], 2)}\n")
             for i in range(K*N):
                 file.write(f"{round(x_house[i], 2)},{round(y_house[i], 2)}\n")
-
-    wells = np.column_stack((x_well, y_well))
-    houses = np.column_stack((x_house, y_house))
-
-    return Graph(N, K, wells, houses)
 
 def read_input(input_file) -> Graph:
     '''
