@@ -4,8 +4,10 @@ import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 
+from src.helpers.arguments_parser import ApplicationMode
 
-def parse_arguments():
+
+def parse_arguments() :
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", default=2, type=int)
     parser.add_argument("-k", default=2, type=int)
@@ -119,7 +121,11 @@ def display_output(n, k, output_file):
 
 def main():
     args = parse_arguments()
-    generate_input(args.n, args.k, args.input_file)
+    selected_mode = ApplicationMode.from_str(args.m)
+
+    if selected_mode == ApplicationMode.GENERATE_INPUT:
+        generate_input(args.n, args.k, args.input_file)
+    
     execute_hungarian(args.n, args.k, args.input_file, args.output_file)
     display_output(args.n, args.k, args.output_file)
 
