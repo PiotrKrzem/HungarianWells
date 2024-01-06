@@ -21,11 +21,11 @@ def write_to_output(graph: Graph, matching: Matching, output_file: str):
     matching_houses = []
 
     for well in matching_wells:
-        matching_houses.append([edge.house for edge in matching.edges if edge.well == well])
+        matching_houses.append([edge.house for edge in matching.edges if edge.well.idx == well.idx])
 
     for i in range(len(matching_wells)):
         output.write(f"W{i + 1}({matching_wells[i].x},{matching_wells[i].y}) -> ")
-        for j in range(graph.k):
+        for j in range(len(matching_houses[i])):
             output.write(f"H{i * graph.k + j + 1}({matching_houses[i][j].x},{matching_houses[i][j].y})")
             if j < graph.k - 1:
                 output.write(",")

@@ -30,14 +30,6 @@ def main():
     if not os.path.exists(pictures):
         os.mkdir(pictures)
 
-    # 2x1
-    n, k = 2, 1
-    generate_input(n, k, input_file)
-    graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(graph, matching, output_file)
-    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
-    return
-
     # Example from inintial documentation
     with open("input.txt", 'w') as f:
         f.writelines([
@@ -50,12 +42,14 @@ def main():
             "1,2"
         ])
     n, k = 2, 2
+    print(f'N: {n}, K: {k}')
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     # 3x2
     n, k = 3, 2
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -63,6 +57,7 @@ def main():
 
     # 2x4
     n, k = 2, 4
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -70,6 +65,7 @@ def main():
 
     # 4x3
     n, k = 4, 3
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -77,6 +73,7 @@ def main():
 
     # benchmarking
     n, k = 5, 5
+    print(f'N: {n}, K: {k}')
     measurements = np.zeros((n, k))
     for n in range(1, n + 1):
         for k in range(1, k + 1):
