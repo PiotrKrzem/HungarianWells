@@ -56,6 +56,7 @@ def main():
 
     # 3x2
     n, k = 3, 2
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -64,6 +65,7 @@ def main():
 
     # 2x4
     n, k = 2, 4
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -71,6 +73,7 @@ def main():
 
     # 4x3
     n, k = 4, 3
+    print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
@@ -78,6 +81,7 @@ def main():
 
     # benchmarking
     n, k = 5, 5
+    print(f'N: {n}, K: {k}')
     measurements = np.zeros((n, k))
     for n in range(1, n + 1):
         for k in range(1, k + 1):
