@@ -49,15 +49,15 @@ class Edge():
     Class describing edge in the graph.
     '''
 
-    def __init__(self, src: Node, dst: Node, weight: float) -> None:
+    def __init__(self, house: Node, well: Node, weight: float) -> None:
         '''
         Parameters:
-        src - source node
-        dst - destination done
+        house - source node
+        well - destination node
         weight - weight of the edge
         '''
-        self.src = src
-        self.dst = dst
+        self.house = house
+        self.well = well
         self.weight = weight
 
 class Graph():
@@ -68,21 +68,27 @@ class Graph():
     def __init__(self, 
                  n: int, 
                  k: int, 
-                 wells: List[np.ndarray], 
-                 houses: List[np.ndarray],
+                 wells_coords: List[np.ndarray], 
+                 houses_coords: List[np.ndarray],
+                 wells_labels: List[float] = None,
+                 houses_labels: List[float] = None,
                  empty_edges: bool = False) -> None:
         '''
         Parameters:
         n - number of wells
         k - number of houses per well
-        wells - list of coordinates of wells
-        houses - list of coordinates of houses
+        wells_coords - list of coordinates of wells
+        houses_coords - list of coordinates of houses
+        wells_labels - list of labels of wells
+        houses_labels - list of labels of houses
         empty_edges - flag indicating if the graph should be initialized without edges
         '''
         self.n = n
         self.k = k
-        self.wells = [Node(coordinates, idx) for idx, coordinates in enumerate(wells)]
-        self.houses = [Node(coordinates, idx) for idx, coordinates in enumerate(houses)]
+        self.wells = [Node(coordinates, idx) if wells_labels == None else 
+                      Node(coordinates, idx, wells_labels[idx]) for idx, coordinates in enumerate(wells_coords)]
+        self.houses = [Node(coordinates, idx) if houses_labels == None else 
+                      Node(coordinates, idx, houses_labels[idx]) for idx, coordinates in enumerate(houses_coords)]
         self.edges: List[Edge] = self.construct_edges(self.wells) if not empty_edges else []
 
     @classmethod
@@ -103,7 +109,10 @@ class Graph():
         wells_coords = [[well.x, well.y] for well in wells]
         houses_coords = [[house.x, house.y] for house in houses]
 
-        return cls(n, k, wells_coords, houses_coords, empty_edges)
+        wells_labels = [well.label for well in wells]
+        houses_labels = [house.label for house in houses]
+
+        return cls(n, k, wells_coords, houses_coords, wells_labels, houses_labels, empty_edges)
 
     def construct_edges(self, wells: List[Node]) -> List[Edge]:
         '''

@@ -38,7 +38,7 @@ class Matching():
         Returns: boolean indicating if given edge is within matching
         '''
         for edge in self.edges:
-            if edge.src == src and edge.dst == dst:
+            if edge.house == src and edge.well == dst:
                 return True
             
         return False
@@ -53,6 +53,6 @@ class Matching():
         '''
         edges = self.edges
         for edge in edges:
-            if edge.src == src and edge.dst == dst:
+            if edge.house == src and edge.well == dst:
                 self.edges.remove(edge)
                 return
