@@ -28,7 +28,7 @@ def initial_labeling(graph: Graph) -> Graph:
     '''
     for i in range(graph.n):
         graph.wells[i].label = 0
-        graph.houses[i].label = min(graph.houses[i].get_weights_of_edges())
+        graph.houses[i].label = max(graph.houses[i].get_weights_of_edges())
     
     return graph
 
@@ -42,11 +42,11 @@ def equality_graph(graph: Graph) -> Graph:
 
     for i in range(0, graph.n**2):
         edge = graph.edges[i]
-        if edge.weight == edge.src.label + edge.dst.label:
-            edge_copy = Edge(equality_graph.houses[edge.src.idx], equality_graph.wells[edge.dst.idx], edge.weight)
+        if edge.weight == edge.house.label + edge.well.label:
+            edge_copy = Edge(equality_graph.houses[edge.house.idx], equality_graph.wells[edge.well.idx], edge.weight)
             equality_graph.edges.append(edge_copy)
-            equality_graph.houses[edge.src.idx].edges.append(edge_copy)
-            equality_graph.wells[edge.dst.idx].edges.append(edge_copy)
+            equality_graph.houses[edge.house.idx].edges.append(edge_copy)
+            equality_graph.wells[edge.well.idx].edges.append(edge_copy)
     
     return equality_graph
 
@@ -68,7 +68,7 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
         current, path = queue.pop(0)
         visited[current] = True
         
-        adj_nodes = [edge.src if current in graph.wells else edge.dst for edge in current.edges]
+        adj_nodes = [edge.house if current in graph.wells else edge.well for edge in current.edges]
         for neighbor in adj_nodes:
             if not visited[neighbor]:
                 queue.append((neighbor, path + [neighbor]))
@@ -92,7 +92,7 @@ def is_augmenting(path: List[Node], matching: Matching):
     if len(matching.edges) == 0:
         return False
     
-    return not (matching.edges[0].src == path[0] or matching.edges[-1].dst == path[-1])
+    return not (matching.edges[0].house == path[0] or matching.edges[-1].well == path[-1])
     
 
 def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], bool]:
@@ -115,7 +115,7 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], 
     
     return [], False
 
-def label_modification(graph: Graph, path: List[int]) -> Graph:
+def label_modification(graph: Graph, path: List[int], original_path) -> Graph:
     '''
     Method performs labels modification.
 
@@ -128,27 +128,26 @@ def label_modification(graph: Graph, path: List[int]) -> Graph:
     houses_in_path = path[::2]
     wells_in_path = path[1::2]
 
-    S: List[Node] = []
+    S: List[Node] = [h.idx for h in graph.houses if h.idx in houses_in_path]
     W_minus_T = [w.idx for w in graph.wells if w.idx not in wells_in_path]
-
-    for house in graph.houses:
-        if house.idx in houses_in_path:
-            S.append(house.idx)
 
     deltas = []
     for edge in graph.edges:
-        if edge.src.idx in S and edge.dst.idx in W_minus_T:
-            deltas.append(edge.src.label + edge.dst.label - edge.weight)
+        if edge.house.idx in S and edge.well.idx in W_minus_T:
+            deltas.append(edge.house.label + edge.well.label - edge.weight)
+
+            if edge.house.label + edge.well.label - edge.weight == 0:
+                print(":)")
 
     min_delta = min(deltas, default=0)
 
     for house in graph.houses:
         if house.idx in S:
-            edge.weight += min_delta
+            house.label -= min_delta
 
     for well in graph.wells:
         if well.idx in wells_in_path:
-            edge.weight -= min_delta
+            well.label += min_delta
 
     return graph
 
@@ -215,17 +214,18 @@ def run_hungarian(input_file) -> Tuple[Graph, Matching]:
     # Step 3: Initial feasible labeling
     duplicate_graph = initial_labeling(duplicate_graph)
 
-    while True:
-        # Step 4: Construct equality graph
-        graph_l = equality_graph(duplicate_graph)
+    # Step 4: Construct equality graph
+    graph_l = equality_graph(duplicate_graph)
 
+    while True:
         # Step 5: Construct augmenting path
         path, is_augmenting = find_augmenting_path(graph_l, M)
 
         if not is_augmenting:
             # Step 6: Label modification
             path_with_idx = [node.idx for node in path]
-            duplicate_graph = label_modification(duplicate_graph, path_with_idx)
+            duplicate_graph = label_modification(duplicate_graph, path_with_idx, path)
+            graph_l = equality_graph(duplicate_graph)
             continue
 
         # Step 7: Matching modification
