@@ -29,7 +29,7 @@ def initial_labeling(graph: Graph) -> Graph:
     for i in range(graph.n):
         graph.wells[i].label = 0
         graph.houses[i].label = max(graph.houses[i].get_weights_of_edges())
-    
+
     return graph
 
 def equality_graph(graph: Graph) -> Graph:
@@ -66,15 +66,50 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
     while queue:
         current, path = queue.pop(0)
         
-        adj_nodes = [edge.house if current in graph.wells else edge.well for edge in current.edges]
+        adj_nodes = []
+        is_well = current in graph.wells
+        for edge in current.edges:
+            adj_nodes.append(edge.house if is_well else edge.well)
+
+        queue_extended = False
         for neighbor in adj_nodes:
             if neighbor not in path:
                 queue.append((neighbor, path + [neighbor]))
+                queue_extended = True
 
-        if len(path) >= 2:
+        if not queue_extended:
             alternating_paths.append(path)
+
+        print(len(queue))
     
     return alternating_paths
+
+def find_augmenting_paths(graph: Graph, starting_node: Node, matching: Matching):
+    queue = [(starting_node, [starting_node])]
+    alternating_path = []
+
+    while queue:
+        current, path = queue.pop(0)
+
+        adj_nodes = []
+        is_well = current in graph.wells
+        for edge in current.edges:
+            if matching.contains_edge(edge.house, edge.well) != len(path) % 2:
+                adj_nodes.append(edge.house if is_well else edge.well)
+
+        queue_extended = False
+        for neighbor in adj_nodes:
+            if neighbor not in path:
+                queue.append((neighbor, path + [neighbor]))
+                queue_extended = True
+
+        if not queue_extended and len(path) >= 2:
+            if is_augmenting(path, matching):
+                return path, True
+            else:
+                alternating_path = path
+
+    return alternating_path, False
 
 def is_augmenting(path: List[Node], matching: Matching):
     '''
@@ -103,10 +138,11 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], 
     for i in range(graph.n):
         if not matching.contains_any(graph.houses[i].edges):
             starting_node = graph.houses[i]
-            for p in find_alternating_paths(graph, starting_node):
-                if is_augmenting(p, matching):
-                    return p, True
-            return p, False
+            return find_augmenting_paths(graph, starting_node, matching)
+            # for p in find_alternating_paths(graph, starting_node):
+            #     if is_augmenting(p, matching):
+            #         return p, True
+            # return p, False
     
     return [], False
 
@@ -126,8 +162,8 @@ def label_modification(graph: Graph, path: List[Node]) -> Graph:
     house_in_path_idx = [node.idx for node in houses_in_path]
     wells_in_path_coords = [(node.x, node.y) for node in wells_in_path]
 
-    S: List[Node] = [h.idx for h in graph.houses if h.idx in house_in_path_idx]
-    W_minus_T = [w.idx for w in graph.wells if (w.x, w.y) not in wells_in_path_coords]
+    S: List[int] = [h.idx for h in graph.houses if h.idx in house_in_path_idx]
+    W_minus_T: List[int] = [w.idx for w in graph.wells if (w.x, w.y) not in wells_in_path_coords]
 
     deltas = []
     for edge in graph.edges:
@@ -181,9 +217,16 @@ def optimal_assignment_check(graph: Graph, matching: Matching) -> bool:
     Returns: boolean indicating if the assignment is optimal
     '''
     for house in graph.houses:
+        if len(matching.edges) >= 6:
+            print("H")
+            for e in house.edges:
+                print(f"{e.house.x} {e.house.y} {e.well.x} {e.well.y}")
+            print("M")
+            for e in matching.edges:
+                print(f"{e.house.x} {e.house.y} {e.well.x} {e.well.y}")
+
         if not matching.contains_any(house.edges):
             return False
-        
     return True
 
 
@@ -219,10 +262,9 @@ def run_hungarian(input_file) -> Tuple[Graph, Matching]:
             # Step 6: Label modification
             duplicate_graph = label_modification(duplicate_graph, path)
             graph_l = equality_graph(duplicate_graph)
-            continue
-
-        # Step 7: Matching modification
-        M = matching_modification(path, M)
+        else:
+            # Step 7: Matching modification
+            M = matching_modification(path, M)
 
         # Step 8: Optimal assignment check
         if optimal_assignment_check(graph_l, M):

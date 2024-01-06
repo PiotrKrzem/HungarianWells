@@ -60,7 +60,8 @@ def main():
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(graph, matching, output_file)
-    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
+    print(f'N: {n}, K: {k}, gN: {graph.n}, gK: {graph.k}')
+    save_output(n, k, output_file, f"{pictures}n_{n}_k_{k}.png")
     return
 
     # 2x4
