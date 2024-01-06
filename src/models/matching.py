@@ -44,17 +44,18 @@ class Matching():
             
         return False
     
-    def contains_node(self, node: Node) -> bool:
+    def contains_node(self, node: Node, is_house: bool) -> bool:
         '''
         Method verifies if the node is in the set of edges.
 
         Parameters:
         node - source node
+        is_house - flag indicating if the node is a house
 
         Returns: boolean indicating if given node is within matching
         '''
         for edge in self.edges:
-            if edge.house == node or edge.well == node:
+            if (is_house and edge.house == node) or ((not is_house) and edge.well == node):
                 return True
             
         return False

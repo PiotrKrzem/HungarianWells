@@ -17,17 +17,23 @@ def write_to_output(graph: Graph, matching: Matching, output_file: str):
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
     
-    matching_wells = list(set([edge.well for edge in matching.edges]))
+    matching_wells_coords = list(set([(edge.well.x, edge.well.y) for edge in matching.edges]))
+    matching_wells = []
     matching_houses = []
 
+    for edge in matching.edges:
+        if (edge.well.x, edge.well.y) in matching_wells_coords:
+            matching_wells.append(edge.well)
+            matching_wells_coords.remove((edge.well.x, edge.well.y))
+
     for well in matching_wells:
-        matching_houses.append([edge.house for edge in matching.edges if edge.well == well])
+        matching_houses.append([edge.house for edge in matching.edges if (edge.well.x, edge.well.y) == (well.x, well.y)])
 
     for i in range(len(matching_wells)):
         output.write(f"W{i + 1}({matching_wells[i].x},{matching_wells[i].y}) -> ")
-        for j in range(graph.k):
+        for j in range(len(matching_houses[i])):
             output.write(f"H{i * graph.k + j + 1}({matching_houses[i][j].x},{matching_houses[i][j].y})")
-            if j < graph.k - 1:
+            if j < len(matching_houses[i]) - 1:
                 output.write(",")
         output.write("\n")
 

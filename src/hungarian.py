@@ -86,7 +86,8 @@ def is_augmenting(path: List[Node], matching: Matching):
 
     Returns: boolean indicating if path is augmenting
     '''
-    return not (matching.contains_node(path[0]) or matching.contains_node(path[-1]))
+    is_house = len(path) % 2 != 0
+    return not (matching.contains_node(path[0], True) or matching.contains_node(path[-1], is_house))
     
 
 def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], bool]:
@@ -133,7 +134,7 @@ def label_modification(graph: Graph, path: List[Node]) -> Graph:
         if edge.house.idx in S and edge.well.idx in W_minus_T:
             deltas.append(edge.house.label + edge.well.label - edge.weight)
 
-    min_delta = min(deltas)
+    min_delta = min(deltas, default=0)
     for house in graph.houses:
         if house.idx in S:
             house.label -= min_delta
