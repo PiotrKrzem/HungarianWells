@@ -21,8 +21,9 @@ class Matching():
 
         Returns: boolean indicating if matching contains some edge
         '''
+        matching_edges = [(edge.house.idx, edge.well.idx) for edge in self.edges]
         for edge in edges:
-            if edge in self.edges:
+            if (edge.house.idx, edge.well.idx) in matching_edges:
                 return True
             
         return False
@@ -43,6 +44,21 @@ class Matching():
             
         return False
     
+    def contains_node(self, node: Node) -> bool:
+        '''
+        Method verifies if the node is in the set of edges.
+
+        Parameters:
+        node - source node
+
+        Returns: boolean indicating if given node is within matching
+        '''
+        for edge in self.edges:
+            if edge.house == node or edge.well == node:
+                return True
+            
+        return False
+    
     def remove_edge(self, src: Node, dst: Node) -> None:
         '''
         Method removes edge of given source and destination.
@@ -56,3 +72,5 @@ class Matching():
             if edge.house == src and edge.well == dst:
                 self.edges.remove(edge)
                 return
+            
+            

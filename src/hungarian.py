@@ -60,19 +60,16 @@ def find_alternating_paths(graph: Graph, starting_node: Node):
 
     Returns: list of alternating paths
     '''
-    visited = { node: False for node in graph.wells + graph.houses }
     queue = [(starting_node, [starting_node])]
     alternating_paths = []
 
     while queue:
         current, path = queue.pop(0)
-        visited[current] = True
         
         adj_nodes = [edge.house if current in graph.wells else edge.well for edge in current.edges]
         for neighbor in adj_nodes:
-            if not visited[neighbor]:
+            if neighbor not in path:
                 queue.append((neighbor, path + [neighbor]))
-                visited[neighbor] = True
 
         if len(path) >= 2:
             alternating_paths.append(path)
@@ -89,10 +86,7 @@ def is_augmenting(path: List[Node], matching: Matching):
 
     Returns: boolean indicating if path is augmenting
     '''
-    if len(matching.edges) == 0:
-        return False
-    
-    return not (matching.edges[0].house == path[0] or matching.edges[-1].well == path[-1])
+    return not (matching.contains_node(path[0]) or matching.contains_node(path[-1]))
     
 
 def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], bool]:
@@ -115,7 +109,7 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], 
     
     return [], False
 
-def label_modification(graph: Graph, path: List[int], original_path) -> Graph:
+def label_modification(graph: Graph, path: List[Node]) -> Graph:
     '''
     Method performs labels modification.
 
@@ -128,16 +122,16 @@ def label_modification(graph: Graph, path: List[int], original_path) -> Graph:
     houses_in_path = path[::2]
     wells_in_path = path[1::2]
 
-    S: List[Node] = [h.idx for h in graph.houses if h.idx in houses_in_path]
-    W_minus_T = [w.idx for w in graph.wells if w.idx not in wells_in_path]
+    house_in_path_idx = [node.idx for node in houses_in_path]
+    wells_in_path_coords = [(node.x, node.y) for node in wells_in_path]
+
+    S: List[Node] = [h.idx for h in graph.houses if h.idx in house_in_path_idx]
+    W_minus_T = [w.idx for w in graph.wells if (w.x, w.y) not in wells_in_path_coords]
 
     deltas = []
     for edge in graph.edges:
         if edge.house.idx in S and edge.well.idx in W_minus_T:
             deltas.append(edge.house.label + edge.well.label - edge.weight)
-
-            if edge.house.label + edge.well.label - edge.weight == 0:
-                print(":)")
 
     min_delta = min(deltas)
     for house in graph.houses:
@@ -145,7 +139,7 @@ def label_modification(graph: Graph, path: List[int], original_path) -> Graph:
             house.label -= min_delta
 
     for well in graph.wells:
-        if well.idx in wells_in_path:
+        if (well.x, well.y) in wells_in_path_coords:
             well.label += min_delta
 
     return graph
@@ -170,7 +164,7 @@ def matching_modification(path: List[Node], matching: Matching) -> Matching:
         if matching.contains_edge(src_node, dst_node):
             matching.remove_edge(src_node, dst_node)
         else:
-            distance = dst_node.compute_distance(src_node)
+            distance = -dst_node.compute_distance(src_node)
             matching.edges.append(Edge(src_node, dst_node, distance))
     
     return matching
@@ -222,8 +216,7 @@ def run_hungarian(input_file) -> Tuple[Graph, Matching]:
 
         if not is_augmenting:
             # Step 6: Label modification
-            path_with_idx = [node.idx for node in path]
-            duplicate_graph = label_modification(duplicate_graph, path_with_idx, path)
+            duplicate_graph = label_modification(duplicate_graph, path)
             graph_l = equality_graph(duplicate_graph)
             continue
 

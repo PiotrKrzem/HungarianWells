@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.models.matching import Matching
 from src.models.graph import Graph
 
@@ -14,16 +16,22 @@ def write_to_output(graph: Graph, matching: Matching, output_file: str):
         output = open(output_file, 'w')  # Open the file in write mode
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
+    
+    matching_wells = list(set([edge.well for edge in matching.edges]))
+    matching_houses = []
 
-    for i in range(graph.n):
-        output.write(f"W{i + 1}({graph.wells[i]['x']},{graph.wells[i]['y']}) -> ")
+    for well in matching_wells:
+        matching_houses.append([edge.house for edge in matching.edges if edge.well == well])
+
+    for i in range(len(matching_wells)):
+        output.write(f"W{i + 1}({matching_wells[i].x},{matching_wells[i].y}) -> ")
         for j in range(graph.k):
-            output.write(f"H{i * graph.k + j + 1}({graph.houses[i * graph.k + j]['x']},{graph.houses[i * graph.k + j]['y']})")
+            output.write(f"H{i * graph.k + j + 1}({matching_houses[i][j].x},{matching_houses[i][j].y})")
             if j < graph.k - 1:
                 output.write(",")
-    output.write("\n")
+        output.write("\n")
 
-    total_cost = -sum([graph.edges[graph.edges.index(edge)].weight for edge in matching.edges])
+    total_cost = -sum([edge.weight for edge in matching.edges])
     output.write(f"Total Cost: {total_cost}\n")
 
     output.close()
