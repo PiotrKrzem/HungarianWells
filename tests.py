@@ -30,6 +30,14 @@ def main():
     if not os.path.exists(pictures):
         os.mkdir(pictures)
 
+    # 2x1
+    n, k = 2, 1
+    generate_input(n, k, input_file)
+    graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(graph, matching, output_file)
+    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
+    return
+
     # Example from inintial documentation
     with open("input.txt", 'w') as f:
         f.writelines([

@@ -140,7 +140,7 @@ def label_modification(graph: Graph, path: List[int]) -> Graph:
         if edge.src.idx in S and edge.dst.idx in W_minus_T:
             deltas.append(edge.src.label + edge.dst.label - edge.weight)
 
-    min_delta = min(deltas)
+    min_delta = min(deltas, default=0)
 
     for house in graph.houses:
         if house.idx in S:

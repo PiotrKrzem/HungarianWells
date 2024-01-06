@@ -143,7 +143,6 @@ def display_output(n, k, output_file):
     create_output_plot(n, k, output_file)
     plt.show()
 
-
 if __name__ == "__main__":
     n = 5
     k = 5
