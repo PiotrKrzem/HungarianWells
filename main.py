@@ -12,20 +12,18 @@ def main():
     args = parse_arguments()
     selected_mode = ApplicationMode.from_str(args.mode)
 
-    # selected_mode = ApplicationMode.GENERATE_AND_RUN
-
     if selected_mode == ApplicationMode.GENERATE_INPUT:
         generate_input(args.n, args.k, args.input_file)
 
     elif selected_mode == ApplicationMode.GENERATE_AND_RUN:
         generate_input(args.n, args.k, args.input_file)
         graph, matching = run_hungarian(args.input_file)
-        write_to_output(graph, matching, args.output_file)
+        write_to_output(matching, args.output_file)
         display_output(graph.n, graph.k, args.output_file)
 
     elif selected_mode == ApplicationMode.READ_INPUT:
         graph, matching = run_hungarian(args.input_file)
-        write_to_output(graph, matching, args.output_file)
+        write_to_output(matching, args.output_file)
         display_output(graph.n, graph.k, args.output_file)
 
     elif selected_mode == ApplicationMode.BENCHMARK:

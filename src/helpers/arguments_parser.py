@@ -2,6 +2,16 @@ import argparse
 from enum import Enum, auto
 
 class ApplicationMode(str, Enum):
+    '''
+    An enum defining possible types in which algorithm can be run.
+
+    Available types:
+    ---------------
+    GENERATE_INPUT - generate input graph and store it into a file
+    GENERATE_AND_RUN - generate input graph, store it into a file and run the algorithm
+    READ_INPUT - read input from the file
+    BENCHMARK - run algorithm benchmarking
+    '''
     GENERATE_INPUT = "GENERATE_INPUT"
     GENERATE_AND_RUN = "GENERATE_AND_RUN"
     READ_INPUT = "READ_INPUT"

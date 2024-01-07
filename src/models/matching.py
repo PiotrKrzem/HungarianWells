@@ -1,9 +1,14 @@
 from typing import List
-from src.models.graph import Edge, Node
+from src.models.graph import Edge, Node, NodeType
 
 class Matching():
     '''
-    Class represents matching in the graph.
+    Class represents a matching in the graph.
+
+    Attributes:
+    ----------
+    edges : List[Edge]
+        list of edges belonging to the mapping
     '''
 
     def __init__(self) -> None:
@@ -12,14 +17,20 @@ class Matching():
         '''
         self.edges: List[Edge] = []
 
+
+
     def contains_any(self, edges: List[Edge]) -> bool:
         '''
         Method verifies if the matching contains any of the edges.
 
         Parameters:
-        edges - set of edges that are to be verified
+        ----------
+        edges : List[Edge]
+            set of edges that are to be verified
 
-        Returns: boolean indicating if matching contains some edge
+        Returns:
+        -------
+        Boolean indicating if matching contains some edge
         '''
         matching_edges = [(edge.house.idx, edge.well.idx) for edge in self.edges]
         for edge in edges:
@@ -28,50 +39,63 @@ class Matching():
             
         return False
     
-    def contains_edge(self, src: Node, dst: Node) -> bool:
+
+
+    def contains_edge(self, house: Node, well: Node) -> bool:
         '''
-        Method verifies if the edge of the given source and destination is in the set of edges.
+        Method verifies if the edge of the given house and well is in the set of edges.
 
         Parameters:
-        src - source node
-        dst - destination node
+        ----------
+        house : Node
+            house node
+        well : Node
+            well node
 
-        Returns: boolean indicating if given edge is within matching
+        Returns:
+        -------
+        Boolean indicating if given edge is within matching
         '''
         for edge in self.edges:
-            if edge.house == src and edge.well == dst:
+            if edge.house.idx == house.idx and edge.well.idx == well.idx:
                 return True
             
         return False
     
-    def contains_node(self, node: Node, is_house: bool) -> bool:
+
+    
+    def contains_node(self, node: Node) -> bool:
         '''
         Method verifies if the node is in the set of edges.
 
         Parameters:
-        node - source node
-        is_house - flag indicating if the node is a house
+        ----------
+        node : Node
+            source node
 
-        Returns: boolean indicating if given node is within matching
+        Returns:
+        -------
+        Boolean indicating if given node is within matching.
         '''
+        is_well = NodeType.WELL == node.type
         for edge in self.edges:
-            if (is_house and edge.house == node) or ((not is_house) and edge.well == node):
-                return True
-            
+            if ((not is_well) and edge.house == node) or (is_well and edge.well == node):
+                return True     
         return False
     
-    def remove_edge(self, src: Node, dst: Node) -> None:
+
+    
+    def remove_edge(self, house: Node, well: Node) -> None:
         '''
-        Method removes edge of given source and destination.
+        Method removes edge of given house and well.
 
         Parameters:
-        src - source node
-        dst - destination node
+        ----------
+        house : Node
+            house node
+        well : Node
+            well node
         '''
-        edges = self.edges
-        for edge in edges:
-            if edge.house == src and edge.well == dst:
-                self.edges.remove(edge)
-                return
+        self.edges = [edge for edge in self.edges if not (edge.house.idx == house.idx and edge.well.idx == well.idx)]
             
             

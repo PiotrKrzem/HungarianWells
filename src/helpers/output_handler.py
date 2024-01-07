@@ -1,19 +1,18 @@
-import numpy as np
-
 from src.models.matching import Matching
-from src.models.graph import Graph
 
-def write_to_output(graph: Graph, matching: Matching, output_file: str):
+def write_to_output(matching: Matching, output_file: str):
     '''
     Method writes results of matching to indicated output file.
 
     Parameters:
-    matching - resulting matching
-    output_file - name of the file to which the results are to be stores
+    ----------
+    matching : Matching
+        resulting matching
+    output_file : str
+        name of the file to which the results are to be stores
     '''
-
     try:
-        output = open(output_file, 'w')  # Open the file in write mode
+        output = open(output_file, 'w')
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
     
