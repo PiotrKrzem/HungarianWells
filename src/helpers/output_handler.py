@@ -1,29 +1,45 @@
 from src.models.matching import Matching
-from src.models.graph import Graph
 
-def write_to_output(graph: Graph, matching: Matching, output_file: str):
+def write_to_output(matching: Matching, output_file: str):
     '''
     Method writes results of matching to indicated output file.
 
     Parameters:
-    matching - resulting matching
-    output_file - name of the file to which the results are to be stores
+    ----------
+    matching : Matching
+        resulting matching
+    output_file : str
+        name of the file to which the results are to be stores
     '''
-
     try:
-        output = open(output_file, 'w')  # Open the file in write mode
+        output = open(output_file, 'w')
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
+    
+    matching_wells_coords = list(set([(edge.well.x, edge.well.y) for edge in matching.edges]))
+    matching_wells = []
+    matching_houses = []
 
-    for i in range(graph.n):
-        output.write(f"W{i + 1}({graph.wells[i]['x']},{graph.wells[i]['y']}) -> ")
-        for j in range(graph.k):
-            output.write(f"H{i * graph.k + j + 1}({graph.houses[i * graph.k + j]['x']},{graph.houses[i * graph.k + j]['y']})")
-            if j < graph.k - 1:
+    for edge in matching.edges:
+        if (edge.well.x, edge.well.y) in matching_wells_coords:
+            matching_wells.append(edge.well)
+            matching_wells_coords.remove((edge.well.x, edge.well.y))
+
+    for well in matching_wells:
+        matching_houses.append([edge.house for edge in matching.edges if (edge.well.x, edge.well.y) == (well.x, well.y)])
+
+    well_idx, house_idx = 1, 1
+    for i in range(len(matching_wells)):
+        output.write(f"W{well_idx}({matching_wells[i].x},{matching_wells[i].y}) -> ")
+        well_idx += 1
+        for j in range(len(matching_houses[i])):
+            output.write(f"H{house_idx}({matching_houses[i][j].x},{matching_houses[i][j].y})")
+            house_idx += 1
+            if j < len(matching_houses[i]) - 1:
                 output.write(",")
-    output.write("\n")
+        output.write("\n")
 
-    total_cost = -sum([graph.edges[graph.edges.index(edge)].weight for edge in matching.edges])
-    output.write(f"Total Cost: {total_cost}\n")
+    total_cost = -sum([edge.weight for edge in matching.edges])
+    output.write(f"Total Cost: {total_cost/100}\n")
 
     output.close()
