@@ -36,7 +36,7 @@ def main():
 
     # 2x1
     n, k = 2, 1
-    generate_input(n, k, input_file)
+    # generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -63,7 +63,7 @@ def main():
     # 3x2
     n, k = 3, 2
     print(f'N: {n}, K: {k}')
-    generate_input(n, k, input_file)
+    # generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(n, k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -74,7 +74,7 @@ def main():
     # 2x4
     n, k = 2, 4
     print(f'N: {n}, K: {k}')
-    generate_input(n, k, input_file)
+    # generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -85,7 +85,7 @@ def main():
     # 4x3
     n, k = 4, 3
     print(f'N: {n}, K: {k}')
-    generate_input(n, k, input_file)
+    # generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -97,30 +97,22 @@ def main():
     # 4x4
     n, k = 4, 4
     print(f'N: {n}, K: {k}')
-    generate_input(n, k, input_file)
+    # generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
-    return
-
-    # 4x4
-    n, k = 4, 5
-    print(f'N: {n}, K: {k}')
-    generate_input(n, k, input_file)
-    graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
-    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
-    return
+    # return
 
     input_file = "./Tests/input_test_benchmark.txt"
     output_file = "./Tests/output_test_benchmark.txt"
 
     # benchmarking
-    n, k = 5, 5
+    n, k = 4, 4 
     print(f'N: {n}, K: {k}')
     measurements = np.zeros((n, k))
     for n in range(1, n + 1):
         for k in range(1, k + 1):
+            print(f'Benchmark -> N: {n}, K: {k}')
             generate_input(n, k, input_file)
             measurement = timeit.timeit(
                 lambda: test_hungarian(n, k, input_file, output_file),
