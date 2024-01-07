@@ -79,7 +79,7 @@ class Matching():
         '''
         is_well = NodeType.WELL == node.type
         for edge in self.edges:
-            if ((not is_well) and edge.house == node) or (is_well and edge.well == node):
+            if ((not is_well) and edge.house.idx == node.idx) or (is_well and edge.well.idx == node.idx):
                 return True     
         return False
     
@@ -97,5 +97,3 @@ class Matching():
             well node
         '''
         self.edges = [edge for edge in self.edges if not (edge.house.idx == house.idx and edge.well.idx == well.idx)]
-            
-            

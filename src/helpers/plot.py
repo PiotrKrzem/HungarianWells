@@ -20,41 +20,74 @@ def exponential_cmap(base_cmap=None, colors_count = 256):
 def log_tick_formatter(val, pos=None):
     return f"$10^{{{int(val)}}}$"
 
-def create_time_complexity_plot(n, k, measurements_grid, C = 1/2000, logarithmic = False):
+def create_time_complexity_plot(n, k, measurements_grid, C1 = 1/2000, C2 = 1/2000, logarithmic = False):
     # Make data
     N = np.arange(1, n + 1, 1) + 10e-5
     K = np.arange(1, k + 1, 1) + 10e-5
+    N = np.multiply(N, K)
     N, K = np.meshgrid(N, K)
 
     T = np.multiply(N, K)
-    T = C * np.power(T, 4)
+    T = np.power(T, 4)
 
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    C1 = measurements_grid.max()/T.max() * 1.1
+    T = C1 * T
 
-    ax.set_xlabel('N')
-    ax.set_ylabel('K')
-    ax.set_zlabel('Time')
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6), subplot_kw={"projection": "3d"})
 
-    limit_proxy = plt.Line2D([0], [0], linestyle="none", c='red', marker='o', markersize=10, markerfacecolor='red', alpha=0.7)
-    measurements_proxy = plt.Line2D([0], [0], linestyle="none", c='green', marker='o', markersize=10, markerfacecolor='green', alpha=0.7)
-    ax.legend([limit_proxy, measurements_proxy], [f'O({C}(nk)^4)', 'Measurements'])
+    axs[0].set_xlabel('N')
+    axs[0].set_ylabel('K')
+    axs[0].set_zlabel('Time')
 
+    axs[1].set_xlabel('N')
+    axs[1].set_ylabel('K')
+    axs[1].set_zlabel('Time')
+
+    # limit_proxy = plt.Line2D([0], [0], linestyle="none", c='red', marker='o', markersize=10, markerfacecolor='red', alpha=0.7)
+    # measurements_proxy = plt.Line2D([0], [0], linestyle="none", c='green', marker='o', markersize=10, markerfacecolor='green', alpha=0.7)
+    # axs[0].legend([limit_proxy], [f'O({C1}(nkk)^4 + {C2})'])
+    # axs[1].legend([measurements_proxy], [f'Measurements'])
+
+    axs[0].set_title(f'O((nk)^4)')
+    axs[1].set_title(f'Measurements')
     colors_count = (n+1)*(k+1)
     colors_count = n*k
 
     if not logarithmic:
-        limit_surface = ax.plot_surface(N, K, T, vmin=-1, cmap=exponential_cmap('Reds', colors_count))
-        measurements_surface = ax.plot_surface(N, K, measurements_grid, vmin=-1, cmap=exponential_cmap('Greens', colors_count))
+        zlim_min = 0
+        zlim_max = max(T.max(), measurements_grid.max())
+        axs[0].set_zlim([zlim_min, zlim_max])
+        axs[1].set_zlim([zlim_min, zlim_max])
+
+        # limit_surface = axs[0].plot_surface(N, K, T, vmin=0, cmap=exponential_cmap('Reds', colors_count))
+        # measurements_surface = axs[1].plot_surface(N, K, measurements_grid, vmin=0, cmap=exponential_cmap('Greens', colors_count))
         
-        ax.set_zlabel('Time (s)')
+        limit_surface = axs[0].plot_surface(N, K, T, vmin=0, color='firebrick', shade=True)
+        measurements_surface = axs[1].plot_surface(N, K, measurements_grid, vmin=0, color = 'green', shade=True)
+        
+        axs[0].set_zlabel('Time (s)')
+        axs[1].set_zlabel('Time (s)')
+
     else:
-        limit_surface = ax.plot_surface(N, K, np.emath.logn(4, T), vmin=-1, cmap=exponential_cmap('Reds', colors_count))
-        measurements_surface = ax.plot_surface(N, K, np.emath.logn(4, measurements_grid), vmin=-1, cmap=exponential_cmap('Greens', colors_count))
+        zlim_min = min(np.emath.logn(4, measurements_grid.min()), np.emath.logn(4, T.min()))
+        zlim_max = max(np.emath.logn(4, measurements_grid.max()), np.emath.logn(4, T.max()))
+        axs[0].set_zlim([zlim_min, zlim_max])
+        axs[1].set_zlim([zlim_min, zlim_max])
 
-        ax.zaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
-        ax.zaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+        # limit_surface = axs[0].plot_surface(N, K, np.emath.logn(4, T), vmin=0, cmap=exponential_cmap('Reds', colors_count))
+        # measurements_surface = axs[1].plot_surface(N, K, np.emath.logn(4, measurements_grid), vmin=0, cmap=exponential_cmap('Greens', colors_count))
 
-        ax.set_zlabel('Time, logarithmic (s)')
+        limit_surface = axs[0].plot_surface(N, K, np.emath.logn(4, T), vmin=0, color='firebrick', shade=True)
+        measurements_surface = axs[1].plot_surface(N, K, np.emath.logn(4, measurements_grid), color = 'green', shade=True)
+
+        axs[0].zaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
+        axs[0].zaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+
+        axs[1].zaxis.set_major_formatter(mticker.FuncFormatter(log_tick_formatter))
+        axs[1].zaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+
+        axs[0].set_zlabel('Time, logarithmic (s)')
+        axs[1].set_zlabel('Time, logarithmic (s)')
 
 def create_output_plot(n, k, output_file):
     pattern_string = r'(\w+)\(([\d.]+),([\d.]+)\) -> ' + ','.join([r'(\w+)\(([\d.]+),([\d.]+)\)'] * k)
@@ -67,8 +100,8 @@ def create_output_plot(n, k, output_file):
     with open(output_file, "r") as file:
         output = file.readlines()
 
-        total_cost = output[n]
-        for line in output[:n]:
+        total_cost = output[len(output)-1]
+        for line in output[:len(output)-1]:
             for mapping in pattern.findall(line):
                 well_name, well_x, well_y, *houses_values = mapping
                 wells[well_name] = (float(well_x), float(well_y))
@@ -125,12 +158,12 @@ def create_output_plot(n, k, output_file):
 
     plt.tight_layout()
 
-def display_time_complexity(n, k, measurements_grid, C = 1/2000, logarithmic = False):
-    create_time_complexity_plot(n, k, measurements_grid, C, logarithmic)
+def display_time_complexity(n, k, measurements_grid, C1, C2, logarithmic = False):
+    create_time_complexity_plot(n, k, measurements_grid, C1, C2, logarithmic)
     plt.show()
 
-def save_time_complexity(n, k, measurements_grid, output_plot, C, logarithmic):
-    create_time_complexity_plot(n, k, measurements_grid, C, logarithmic)
+def save_time_complexity(n, k, measurements_grid, output_plot, C1, C2, logarithmic):
+    create_time_complexity_plot(n, k, measurements_grid, C1, C2, logarithmic)
     plt.savefig(output_plot, format='png')
     plt.close()
 
@@ -142,18 +175,3 @@ def save_output(n, k, output_file, output_plot):
 def display_output(n, k, output_file):
     create_output_plot(n, k, output_file)
     plt.show()
-
-if __name__ == "__main__":
-    n = 5
-    k = 5
-    C = 1/3467
-
-    N = np.arange(1, n + 1, 1) + 10e-5
-    K = np.arange(1, k + 1, 1) + 10e-5
-    N, K = np.meshgrid(N, K)
-
-    T = np.multiply(N, K) 
-    T = C * np.power(T, 4) + np.random.rand(n, k) * 0.1
-
-    display_time_complexity(n, k, T, logarithmic=False)
-    display_time_complexity(n, k, T, logarithmic=True)
