@@ -1,10 +1,11 @@
 import numpy as np
 import math
 
-from typing import List
+from typing import List, Tuple
 from enum import Enum, auto
 
 class Matching: pass # defined to avoid circularity in dependencies
+class Edge: pass # defined to avoid circularity in dependencies
 
 class NodeType(Enum):
     '''
@@ -29,19 +30,21 @@ class Node():
         x coordinate of the given node
     y : float
         y coordinate of the given node
-    label : float
+    label : int
         label assigned to the given node
     edges : List[Edge]
         list of edges to which a node belongs
     type : NodeType
         type of the node
+    adj_nodes : List[Tuple[Node, Edge]]
+        list of nodes adjacent to the given node and corresponding edges that connect them
     '''
 
     def __init__(self, 
                  coordinates: np.ndarray, 
                  idx: int,
                  node_type: NodeType,
-                 label: float = 0) -> None:
+                 label: int = 0) -> None:
         '''
         Parameters:
         ----------
@@ -51,7 +54,7 @@ class Node():
             index of the node in the list of nodes in graph
         node_type : NodeType
             type of the node (HOUSE or WELL)
-        label : float, optional (default = 0)
+        label : int, optional (default = 0)
             label assigned to the node
         '''
         self.idx = idx
@@ -59,11 +62,26 @@ class Node():
         self.y = coordinates[1]
         self.label = label
         self.edges: List[Edge] = []
+        self.adj_nodes: List[Tuple[Node, Edge]] = []
         self.type = node_type
 
 
+    def add_edge(self, edge: Edge, adj_node) -> None:
+        '''
+        Method adds an edge connected to the node.
 
-    def compute_weight(self, node) -> float:
+        Parameters:
+        ----------
+        edge : Edge
+            edge which connects a given node
+        adj_node : Node
+            node on the second end of the edge
+        '''
+        self.edges.append(edge)
+        self.adj_nodes.append((adj_node, edge))
+
+
+    def compute_weight(self, node) -> int:
         '''
         Method computes weight of edge connecting two points.
 
@@ -76,11 +94,11 @@ class Node():
         ------
         Negative of euclidean distance between two points.
         '''
-        return -math.dist([self.x, self.y], [node.x, node.y])
+        return -int(round(math.dist([self.x, self.y], [node.x, node.y]), 2) * 100)
 
 
     
-    def get_weights_of_edges(self) -> List[float]:
+    def get_weights_of_edges(self) -> List[int]:
         '''
         Method returns a list of weights of all edges that go from the given node.
 
@@ -102,9 +120,11 @@ class Edge():
         well node of the given edge
     weight : float
         weight of the given edge
+    in_matching : bool
+        flag indicating if the edge is in the current matching
     '''
 
-    def __init__(self, house: Node, well: Node, weight: float) -> None:
+    def __init__(self, house: Node, well: Node, weight: int, in_matching: bool = False) -> None:
         '''
         Parameters:
         ----------
@@ -112,12 +132,15 @@ class Edge():
             house node
         well : Node
             well node
-        weight : float
+        weight : int
             weight of the edge
+        in_matching : bool
+            flag indicating if the edge is in the current matching
         '''
         self.house = house
         self.well = well
         self.weight = weight
+        self.in_matching = in_matching
 
 
     
@@ -176,8 +199,8 @@ class Graph():
                  k: int, 
                  wells_coords: List[np.ndarray], 
                  houses_coords: List[np.ndarray],
-                 wells_labels: List[float] = None,
-                 houses_labels: List[float] = None,
+                 wells_labels: List[int] = None,
+                 houses_labels: List[int] = None,
                  empty_edges: bool = False) -> None:
         '''
         Parameters:
@@ -261,8 +284,8 @@ class Graph():
                 distance = well.compute_weight(house)
                 edge = Edge(house, well, distance)
                 edges.append(edge)
-                house.edges.append(edge)
-                well.edges.append(edge)
+                house.add_edge(edge, well)
+                well.add_edge(edge, house)
         return edges
 
 

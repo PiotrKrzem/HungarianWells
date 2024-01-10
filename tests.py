@@ -36,7 +36,7 @@ def main():
 
     # 2x1
     n, k = 2, 1
-    # generate_input(n, k, input_file)
+    generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -63,7 +63,7 @@ def main():
     # 3x2
     n, k = 3, 2
     print(f'N: {n}, K: {k}')
-    # generate_input(n, k, input_file)
+    generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(n, k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -74,7 +74,7 @@ def main():
     # 2x4
     n, k = 2, 4
     print(f'N: {n}, K: {k}')
-    # generate_input(n, k, input_file)
+    generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -85,7 +85,7 @@ def main():
     # 4x3
     n, k = 4, 3
     print(f'N: {n}, K: {k}')
-    # generate_input(n, k, input_file)
+    generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
@@ -97,7 +97,18 @@ def main():
     # 4x4
     n, k = 4, 4
     print(f'N: {n}, K: {k}')
-    # generate_input(n, k, input_file)
+    generate_input(n, k, input_file)
+    graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(matching, output_file)
+    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
+
+    input_file = "./Tests/input_test_6.txt"
+    output_file = "./Tests/output_test_6.txt"
+
+    # 5x4
+    n, k = 5, 4
+    print(f'N: {n}, K: {k}')
+    generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
     write_to_output(matching, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")

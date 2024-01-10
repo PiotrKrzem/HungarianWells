@@ -40,6 +40,6 @@ def write_to_output(matching: Matching, output_file: str):
         output.write("\n")
 
     total_cost = -sum([edge.weight for edge in matching.edges])
-    output.write(f"Total Cost: {total_cost}\n")
+    output.write(f"Total Cost: {total_cost / 100}\n")
 
     output.close()
