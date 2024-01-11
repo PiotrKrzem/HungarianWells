@@ -34,6 +34,7 @@ def main():
     if not os.path.exists(tests):
         os.mkdir(tests)
 
+
     # 2x1
     n, k = 2, 1
     generate_input(n, k, input_file)
@@ -104,6 +105,18 @@ def main():
 
     input_file = "./Tests/input_test_6.txt"
     output_file = "./Tests/output_test_6.txt"
+
+    # 5x3
+    n, k = 5, 3
+    print(f'N: {n}, K: {k}')
+    generate_input(n, k, input_file)
+    graph, matching = test_hungarian(n, k, input_file, output_file)
+    write_to_output(matching, output_file)
+    save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
+    # return
+
+    input_file = "./Tests/input_test_7.txt"
+    output_file = "./Tests/output_test_7.txt"
 
     # 5x4
     n, k = 5, 4
