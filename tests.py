@@ -9,14 +9,15 @@ from src.helpers.plot import display_output, display_time_complexity
 
 RUN_SAFE = False
 DISPLAY_OUTPUT_INSTEAD_OF_SAVE = False
-DISPLAY_COMPLEXITY_INSTEAD_OF_SAVE = False
+DISPLAY_COMPLEXITY_INSTEAD_OF_SAVE = True
 
 MAX_N, MAX_K = 5, 5
+REPEAT_BENCHMARK_TIMES = 1
 REGENERATE = [
     # (2,2)
 ]
 RUN_ONLY = [
-    # (5,5)
+    (4,5)
 ]
 
 def test_hungarian(input_file):
@@ -92,47 +93,33 @@ def main():
                 input_file = f"./Tests/input_test_{n}_{k}.txt"
                 output_file = f"./Tests/output_test_{n}_{k}.txt"
                 print(f'N: {n}, K: {k}')
-                
-                if REGENERATE.count((n, k)) or not os.path.exists(input_file):
+                if REGENERATE.count((n, k)) or not os.path.exists(input_file) :
+                    print(f'Regenerating input N: {n}, K: {k}')
                     generate_input(n, k, input_file)
 
                 graph, matching = test_hungarian(input_file)
                 write_to_output(matching, output_file)
                 process_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
-
-    # while True:
-    #     try:
-    #         n, k = 5, 5
-    #         input_file = f"./Tests/input_test_{n}_{k}.txt"
-    #         output_file = f"./Tests/output_test_{n}_{k}.txt"
-    #         print(f'N: {n}, K: {k}')
-            
-    #         if REGENERATE.count((n, k)) or not os.path.exists(input_file):
-    #             generate_input(n, k, input_file)
-
-    #         graph, matching = test_hungarian(input_file)
-    #         write_to_output(matching, output_file)
-    #         process_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
-    #         break
-    #     except InterruptedError as e:
-    #         print(f"{str(e)}")
-
     # BENCHMARKING
     print(f'Benchmark N: {MAX_N}, K: {MAX_K}')
-    measurements = np.zeros((MAX_N, MAX_K))
-    for n in range(1, MAX_N + 1):
-        for k in range(1, MAX_K + 1):
-            print(f'Benchmark -> N: {n}, K: {k}')
-            input_file = f"./Tests/input_test_{n}_{k}.txt"
-            output_file = f"./Tests/output_test_benchmark.txt"
-            measurement = timeit.timeit(
-                lambda: test_hungarian(input_file),
-                number=1
-            )
-            measurements[n-1, k-1] = measurement * 100
-    # measurements[MAX_N-1, MAX_K-1] = measurements.max() * n * k
+    full_measurements = np.zeros((MAX_N, MAX_K))
 
+    for repeat in range(REPEAT_BENCHMARK_TIMES):
+        measurements = np.zeros((MAX_N, MAX_K))
+        for n in range(1, MAX_N + 1):
+            for k in range(1, MAX_K + 1):
+                print(f'({repeat+1}/{REPEAT_BENCHMARK_TIMES}) Benchmark -> N: {n}, K: {k}')
+                input_file = f"./Tests/input_test_{n}_{k}.txt"
+                output_file = f"./Tests/output_test_benchmark.txt"
+                generate_input(n, k, input_file)
+                measurement = timeit.timeit(
+                    lambda: test_hungarian(input_file),
+                    number=1
+                )
+                measurements[n-1, k-1] = measurement * 100
+        full_measurements += measurements
+    full_measurements = full_measurements / float(max(REPEAT_BENCHMARK_TIMES, 1))
     process_time_complexity(n, k, measurements, f"{pictures}standard_benchmark.png", logarithmic=False)
     process_time_complexity(n, k, measurements, f"{pictures}log_benchmark.png", logarithmic=True)
 
