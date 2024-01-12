@@ -33,11 +33,11 @@ def process_output(n, k, output_file, output_plot):
     else:
         return save_output(n, k, output_file, output_plot)
 
-def process_time_complexity(n, k, measurements_grid, output_plot, C1 = 1/4000, C2 = 1, logarithmic = False):
+def process_time_complexity(n, k, measurements_grid, output_plot, logarithmic = False):
     if DISPLAY_COMPLEXITY_INSTEAD_OF_SAVE:
-        return display_time_complexity(n, k, measurements_grid, C1, C2, logarithmic)
+        return display_time_complexity(n, k, measurements_grid, logarithmic)
     else:
-        return save_time_complexity(n, k, measurements_grid, output_plot, C1, C2, logarithmic)
+        return save_time_complexity(n, k, measurements_grid, output_plot, logarithmic)
 
 def main():
     
@@ -82,7 +82,7 @@ def main():
     write_to_output(matching, output_file)
     process_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
     """
-    
+
 
     # TESTS
     # 5x5
@@ -131,7 +131,7 @@ def main():
                 number=1
             )
             measurements[n-1, k-1] = measurement * 100
-    measurements[MAX_N-1, MAX_K-1] = measurements.max() * n * k
+    # measurements[MAX_N-1, MAX_K-1] = measurements.max() * n * k
 
     process_time_complexity(n, k, measurements, f"{pictures}standard_benchmark.png", logarithmic=False)
     process_time_complexity(n, k, measurements, f"{pictures}log_benchmark.png", logarithmic=True)

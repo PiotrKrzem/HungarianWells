@@ -20,18 +20,20 @@ def exponential_cmap(base_cmap=None, colors_count = 256):
 def log_tick_formatter(val, pos=None):
     return f"$10^{{{int(val)}}}$"
 
-def create_time_complexity_plot(n, k, measurements_grid, C1 = 1/2000, C2 = 1/2000, logarithmic = False):
+def create_time_complexity_plot(n, k, measurements_grid, logarithmic = False):
     # Make data
-    N = np.arange(1, n + 1, 1) + 10e-5
-    K = np.arange(1, k + 1, 1) + 10e-5
+    N = np.arange(1, n + 1, 1)
+    K = np.arange(1, k + 1, 1)
     N = np.multiply(N, K)
     N, K = np.meshgrid(N, K)
 
     T = np.multiply(N, K)
     T = np.power(T, 4)
 
-    C1 = measurements_grid.max()/T.max() * 1.1
-    T = C1 * T
+    B = measurements_grid[0][0] - T[0][0]
+    T = T + B
+    A = measurements_grid.max()/T.max() * 1.1
+    T = A * T
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6), subplot_kw={"projection": "3d"})
 
@@ -158,12 +160,12 @@ def create_output_plot(n, k, output_file):
 
     plt.tight_layout()
 
-def display_time_complexity(n, k, measurements_grid, C1, C2, logarithmic = False):
-    create_time_complexity_plot(n, k, measurements_grid, C1, C2, logarithmic)
+def display_time_complexity(n, k, measurements_grid, logarithmic = False):
+    create_time_complexity_plot(n, k, measurements_grid, logarithmic)
     plt.show()
 
-def save_time_complexity(n, k, measurements_grid, output_plot, C1, C2, logarithmic):
-    create_time_complexity_plot(n, k, measurements_grid, C1, C2, logarithmic)
+def save_time_complexity(n, k, measurements_grid, output_plot, logarithmic):
+    create_time_complexity_plot(n, k, measurements_grid, logarithmic)
     plt.savefig(output_plot, format='png')
     plt.close()
 

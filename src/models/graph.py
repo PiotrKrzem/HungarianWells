@@ -1,10 +1,11 @@
 import numpy as np
 import math
 
-from typing import List
+from typing import List, Tuple
 from enum import Enum, auto
 
 class Matching: pass # defined to avoid circularity in dependencies
+class Edge: pass # defined to avoid circularity in dependencies
 
 class NodeType(Enum):
     '''
@@ -35,6 +36,8 @@ class Node():
         list of edges to which a node belongs
     type : NodeType
         type of the node
+    adj_nodes : List[Tuple[Node, Edge]]
+        list of nodes adjacent to the given node and corresponding edges that connect them
     '''
 
     def __init__(self, 
@@ -59,8 +62,23 @@ class Node():
         self.y = coordinates[1]
         self.label = label
         self.edges: List[Edge] = []
+        self.adj_nodes: List[Tuple[Node, Edge]] = []
         self.type = node_type
 
+
+    def add_edge(self, edge: Edge, adj_node) -> None:
+        '''
+        Method adds an edge connected to the node.
+
+        Parameters:
+        ----------
+        edge : Edge
+            edge which connects a given node
+        adj_node : Node
+            node on the second end of the edge
+        '''
+        self.edges.append(edge)
+        self.adj_nodes.append((adj_node, edge))
 
 
     def compute_weight(self, node) -> int:
@@ -100,11 +118,13 @@ class Edge():
         house node of the given edge
     well : Node
         well node of the given edge
-    weight : int
+    weight : float
         weight of the given edge
+    in_matching : bool
+        flag indicating if the edge is in the current matching
     '''
 
-    def __init__(self, house: Node, well: Node, weight: int) -> None:
+    def __init__(self, house: Node, well: Node, weight: int, in_matching: bool = False) -> None:
         '''
         Parameters:
         ----------
@@ -114,10 +134,13 @@ class Edge():
             well node
         weight : int
             weight of the edge
+        in_matching : bool
+            flag indicating if the edge is in the current matching
         '''
         self.house = house
         self.well = well
         self.weight = weight
+        self.in_matching = in_matching
 
 
     
@@ -190,9 +213,9 @@ class Graph():
             list of coordinates of wells
         houses_coords : List[np.ndarray]
             list of coordinates of houses
-        wells_labels : List[int], optional
+        wells_labels : List[float], optional
             list of labels of wells
-        houses_labels : List[int], optional
+        houses_labels : List[float], optional
             list of labels of houses
         empty_edges : bool, optional
             flag indicating if the graph should be initialized without edges
@@ -261,8 +284,8 @@ class Graph():
                 distance = well.compute_weight(house)
                 edge = Edge(house, well, distance)
                 edges.append(edge)
-                house.edges.append(edge)
-                well.edges.append(edge)
+                house.add_edge(edge, well)
+                well.add_edge(edge, house)
         return edges
 
 

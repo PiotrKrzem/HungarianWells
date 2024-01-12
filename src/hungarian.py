@@ -52,16 +52,14 @@ def equality_graph(duplicate_graph: Graph) -> Graph:
     for i in range(0, duplicate_graph.n**2):
         edge = duplicate_graph.edges[i]
         if edge.weight == edge.house.label + edge.well.label:
-            edge_copy = Edge(equality_graph.houses[edge.house.idx], equality_graph.wells[edge.well.idx], edge.weight)
-            equality_graph.edges.append(edge_copy)
-            equality_graph.houses[edge.house.idx].edges.append(edge_copy)
-            equality_graph.wells[edge.well.idx].edges.append(edge_copy)
+            equality_graph.edges.append(edge)
+            equality_graph.houses[edge.house.idx].add_edge(edge, equality_graph.wells[edge.well.idx])
+            equality_graph.wells[edge.well.idx].add_edge(edge, equality_graph.houses[edge.house.idx])
     
     return equality_graph
 
 
-
-def find_augmenting_paths(starting_node: Node, matching: Matching) -> Tuple[List[Node], bool]:
+def find_augmenting_paths(starting_node: Node, matching: Matching) -> Tuple[List[Tuple[int, NodeType]], List[Tuple[Node, Edge]], bool]:
     '''
     Method aims to find an augmenting path.
     If such path does not exists, it returns the last available alternating path.
@@ -77,118 +75,35 @@ def find_augmenting_paths(starting_node: Node, matching: Matching) -> Tuple[List
     -------
     Tuple (found path, flag if path is augmenting)
     '''
-    queue = [(starting_node, [starting_node], False)]
-    alternating_path = []
+    queue = [(starting_node, [starting_node], [(starting_node, None)], False)]
+    traversed_nodes = [(starting_node.idx, starting_node.type)]
 
     while queue:
-        current, path, should_be_in_matching = queue.pop(0)
+        current, path_nodes, path, should_be_in_matching = queue.pop(0)
 
         queue_extended = False
-        for edge in current.edges:
-            if edge.is_in_matching(matching) == should_be_in_matching:
-                neighbor = edge.get_adj_node(current)
+        for neighbor, edge in current.adj_nodes:
+            if neighbor not in path_nodes and edge.in_matching == should_be_in_matching:
+                if (neighbor.idx, neighbor.type) not in traversed_nodes:
+                    traversed_nodes.append((neighbor.idx, neighbor.type))
 
-                if neighbor not in path:
-                    queue.append((neighbor, path + [neighbor], not should_be_in_matching))
-                    queue_extended = True
+                queue.append((neighbor, path_nodes + [neighbor], path + [(neighbor, edge)], not should_be_in_matching))
+                queue_extended = True
 
-        if not queue_extended:
-            if len(path) >= 2 and len(path) % 2 == 0 and is_augmenting(path, matching):
-                return path, True
-            elif len(path) > len(alternating_path):
-                alternating_path = path
+        if not queue_extended and len(path) >= 2 and is_augmenting(path, matching):
+                return None, path, True
 
-    if len(alternating_path) == 0:
-        print("!!!!Empty alternating path!!!!")
-
-    return alternating_path, False
-
-def find_augmenting_paths_dfs(starting_node: Node, matching: Matching) -> Tuple[List[Node], bool]:
-    '''
-    Method aims to find an augmenting path.
-    If such path does not exist, it returns the last available alternating path.
-
-    Parameters:
-    ----------
-    starting_node : Node
-        node from which the path search starts
-    matching : Matching
-        current matching in a graph
-    
-    Returns:
-    -------
-    Tuple (found path, flag if path is augmenting)
-    '''
-    stack = [(starting_node, [starting_node], False)]
-    visited = [starting_node]
-    alternating_path = []
-
-    while stack:
-        current, path, should_be_in_matching = stack.pop()
-
-        adj_nodes = [edge.get_adj_node(current) for edge in current.edges if edge.is_in_matching(matching) == should_be_in_matching]
-
-        stack_extended = False
-        for neighbor in adj_nodes:
-            if neighbor not in path and neighbor not in visited:
-                stack.append((neighbor, path + [neighbor], not should_be_in_matching))
-                stack_extended = True
-
-        if not stack_extended:
-            if len(path) >= 2 and is_augmenting(path, matching):
-                return path, True
-            else:
-                visited.append(current)
-                alternating_path = path
-        
-        print(len(stack))
-
-    return alternating_path, False
-
-def find_augmenting_paths_dfs_quick(starting_node: Node, matching: Matching) -> Tuple[List[Node], bool]:
-    '''
-    Method aims to find an augmenting path.
-    If such path does not exist, it returns the last available alternating path.
-
-    Parameters:
-    ----------
-    starting_node : Node
-        node from which the path search starts
-    matching : Matching
-        current matching in a graph
-    
-    Returns:
-    -------
-    Tuple (found path, flag if path is augmenting)
-    '''
-    stack = [(starting_node, [starting_node], False)]
-
-    while stack:
-        current, path, should_be_in_matching = stack.pop()
-
-        adj_nodes = [edge.get_adj_node(current) for edge in current.edges if edge.is_in_matching(matching) == should_be_in_matching]
-
-        stack_extended = False
-        for neighbor in adj_nodes:
-            if neighbor not in path:
-                stack.append((neighbor, path + [neighbor], not should_be_in_matching))
-                stack_extended = True
-                break
-
-        if not stack_extended:
-            if len(path) >= 2 and is_augmenting(path, matching):
-                return path, True
-            else:
-                return path, False
+    return traversed_nodes, None, False
 
 
-def is_augmenting(path: List[Node], matching: Matching):
+
+def is_augmenting(path: List[Tuple[Node, Edge]], matching: Matching):
     '''
     Method verifies if alternating path is an augmenting path.
 
     Parameters:
     ----------
-    path : List[Node]
+    path : List[Tuple[Node, Edge]]
         alternating path to be verified
     matching : Matching
         current matching in a graph
@@ -197,11 +112,11 @@ def is_augmenting(path: List[Node], matching: Matching):
     -------
     Boolean indicating if path is augmenting.
     '''
-    return (not matching.contains_node(path[0])) and (not matching.contains_node(path[-1])) 
+    return (not matching.contains_node(path[0][0])) and (not matching.contains_node(path[-1][0])) 
+    
 
 
-
-def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], bool]:
+def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Tuple[int, NodeType]], List[Tuple[Node, Edge]], bool]:
     '''
     Method constructs augmenting path.
 
@@ -220,14 +135,12 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[List[Node], 
         if not matching.contains_any(graph.houses[i].edges):
             starting_node = graph.houses[i]
             return find_augmenting_paths(starting_node, matching)
-            return find_augmenting_paths_dfs(starting_node, matching)
-            return find_augmenting_paths_dfs_quick(starting_node, matching)
-
+    
     return [], False
 
 
 
-def label_modification(graph: Graph, path: List[Node]) -> Graph:
+def label_modification(graph: Graph, path_nodes: List[Tuple[int, NodeType]]) -> Graph:
     '''
     Method performs labels modification.
 
@@ -235,24 +148,22 @@ def label_modification(graph: Graph, path: List[Node]) -> Graph:
     ----------
     graph : Graph
         graph which labels are to be modified
-    path : List[Node]
+    path_nodes : List[Tuple[int, NodeType]]
         alternating path of the graph
 
     Returns:
     -------
     Graph with modified labels.
     '''
-    path_indexes = [node.idx for node in path]
+    houses_in_path = [idx for idx, node_type in path_nodes if node_type == NodeType.HOUSE]
+    wells_in_path = [idx for idx, node_type in path_nodes if node_type == NodeType.WELL]
 
-    houses_in_path = path_indexes[::2]
-    wells_in_path = path_indexes[1::2]
-
-    S: List[int] =         [h.idx for h in graph.houses if h.idx in houses_in_path]
-    W_minus_T: List[int] = [w.idx for w in graph.wells  if w.idx not in wells_in_path]
+    S: List[int] = [h.idx for h in graph.houses if h.idx in houses_in_path]
+    W_minus_T: List[int] = [w.idx for w in graph.wells if w.idx not in wells_in_path]
 
     deltas = []
     for edge in graph.edges:
-        if edge.house.idx in S and edge.well.idx in W_minus_T:
+        if edge.house.idx in S and edge.well.idx in W_minus_T and edge.house.label + edge.well.label - edge.weight != 0:
             deltas.append(edge.house.label + edge.well.label - edge.weight)
 
     min_delta = min(deltas)
@@ -265,17 +176,17 @@ def label_modification(graph: Graph, path: List[Node]) -> Graph:
         if well.idx in wells_in_path:
             well.label += min_delta
 
-    return graph
+    return (graph, min_delta)
 
 
 
-def matching_modification(path: List[Node], matching: Matching) -> Matching:
+def matching_modification(path: List[Tuple[Node, Edge]], matching: Matching) -> Matching:
     '''
     Method performs modification of current matching.
     
     Parameters:
     ----------
-    path : List[Node]
+    path : List[Tuple[Node, Edge]]
         alternating path in graph 
     matching : Matching
         matching in graph
@@ -285,19 +196,22 @@ def matching_modification(path: List[Node], matching: Matching) -> Matching:
     Modified matching.
     '''
     for i in range(0, len(path) - 1):
-        house = i     if i % 2 == 0 else i + 1
-        well  = i + 1 if i % 2 == 0 else i
+        house = i if i % 2 == 0 else i + 1
+        well = i + 1 if i % 2 == 0 else i
 
-        house_node = path[house]
-        well_node  = path[well]
+        house_node = path[house][0]
+        well_node = path[well][0]
 
-        if matching.contains_edge(house_node, well_node):
+        if matching.contains_edge(path[i+1][1]):
             matching.remove_edge(house_node, well_node)
+            path[i+1][1].in_matching = False
         else:
             distance = well_node.compute_weight(house_node)
             matching.edges.append(Edge(house_node, well_node, distance))
+            path[i+1][1].in_matching = True
     
     return matching
+
 
 
 
@@ -352,11 +266,11 @@ def run_hungarian(input_file: str) -> Tuple[Graph, Matching]:
 
     while True:
         # Step 5: Construct augmenting path
-        path, is_augmenting = find_augmenting_path(graph_l, M)
+        path_nodes, path, is_augmenting = find_augmenting_path(graph_l, M)
 
         if not is_augmenting:
             # Step 6: Label modification
-            duplicate_graph = label_modification(duplicate_graph, path)
+            duplicate_graph, _ = label_modification(duplicate_graph, path_nodes)
             graph_l = equality_graph(duplicate_graph)
         else:   
             # Step 7: Matching modification
@@ -366,69 +280,4 @@ def run_hungarian(input_file: str) -> Tuple[Graph, Matching]:
         if optimal_assignment_check(graph_l, M):
             break
     
-    return graph, M
-
-def test_hungarian(input_file: str) -> Tuple[Graph, Matching]:
-    '''
-    Method test full hungarian algorithm for given input file, with added security for infinite iterations.
-
-    Parameters:
-    ----------
-    input_file : str
-        input file
-
-    Returns:
-    -------
-    Optimal matching.
-    '''
-    # Step 0: Read and construct graph based on the input file
-    graph = read_input(input_file)
-
-    # Step 1: Initialize empty matching
-    M = Matching()
-
-    # Step 2: Duplicate wells
-    duplicate_graph = duplicate_wells(graph)
-
-    # Step 3: Initial feasible labeling
-    duplicate_graph = initial_labeling(duplicate_graph)
-
-    # Step 4: Construct equality graph
-    graph_l = equality_graph(duplicate_graph)
-
-    i = 0
-    edges = duplicate_graph.n * duplicate_graph.k
-    threshold = edges * edges
-
-    while True:
-        # Step 5: Construct augmenting path
-        path, is_augmenting = find_augmenting_path(graph_l, M)
-
-        print(f"Augm: {is_augmenting}")
-        if not is_augmenting:
-            # Step 6: Label modification
-            duplicate_graph = label_modification(duplicate_graph, path)
-            print(f"label_modification {len(graph_l.edges)}", end = '')
-            graph_l = equality_graph(duplicate_graph)
-            print(f"-> {len(graph_l.edges)}")
-
-        else:   
-            # Step 7: Matching modification
-            print(f"matching_modification p{(len(path))} e{len(M.edges)}", end='')
-            M = matching_modification(path, M)
-            print(f"->{len(M.edges)}/{len(graph.houses)}")
-
-        # Step 8: Optimal assignment check
-        if optimal_assignment_check(graph_l, M):
-            break
-
-        # Security check
-        if i == threshold:
-            print(f"{i//edges}/{edges}")
-            raise InterruptedError(f"Threshold reached for {graph.n}x{graph.k}")
-        else:
-            i += 1
-            if i % edges == 0:
-                print(f"{i//edges}/{edges}")
-
     return graph, M

@@ -41,23 +41,21 @@ class Matching():
     
 
 
-    def contains_edge(self, house: Node, well: Node) -> bool:
+    def contains_edge(self, new_edge: Edge) -> bool:
         '''
         Method verifies if the edge of the given house and well is in the set of edges.
 
         Parameters:
         ----------
-        house : Node
-            house node
-        well : Node
-            well node
+        new_edge : Edge
+            edge to be verified
 
         Returns:
         -------
         Boolean indicating if given edge is within matching
         '''
         for edge in self.edges:
-            if edge.house.idx == house.idx and edge.well.idx == well.idx:
+            if edge.house.idx == new_edge.house.idx and edge.well.idx == new_edge.well.idx:
                 return True
             
         return False
@@ -97,3 +95,5 @@ class Matching():
             well node
         '''
         self.edges = [edge for edge in self.edges if not (edge.house.idx == house.idx and edge.well.idx == well.idx)]
+            
+            
