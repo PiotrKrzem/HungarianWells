@@ -29,7 +29,7 @@ class Node():
         x coordinate of the given node
     y : float
         y coordinate of the given node
-    label : float
+    label : int
         label assigned to the given node
     edges : List[Edge]
         list of edges to which a node belongs
@@ -41,7 +41,7 @@ class Node():
                  coordinates: np.ndarray, 
                  idx: int,
                  node_type: NodeType,
-                 label: float = 0) -> None:
+                 label: int = 0) -> None:
         '''
         Parameters:
         ----------
@@ -51,7 +51,7 @@ class Node():
             index of the node in the list of nodes in graph
         node_type : NodeType
             type of the node (HOUSE or WELL)
-        label : float, optional (default = 0)
+        label : int, optional (default = 0)
             label assigned to the node
         '''
         self.idx = idx
@@ -63,7 +63,7 @@ class Node():
 
 
 
-    def compute_weight(self, node) -> float:
+    def compute_weight(self, node) -> int:
         '''
         Method computes weight of edge connecting two points.
 
@@ -76,11 +76,11 @@ class Node():
         ------
         Negative of euclidean distance between two points.
         '''
-        return -math.dist([self.x, self.y], [node.x, node.y])
+        return -int(round(math.dist([self.x, self.y], [node.x, node.y]), 2) * 100)
 
 
     
-    def get_weights_of_edges(self) -> List[float]:
+    def get_weights_of_edges(self) -> List[int]:
         '''
         Method returns a list of weights of all edges that go from the given node.
 
@@ -100,11 +100,11 @@ class Edge():
         house node of the given edge
     well : Node
         well node of the given edge
-    weight : float
+    weight : int
         weight of the given edge
     '''
 
-    def __init__(self, house: Node, well: Node, weight: float) -> None:
+    def __init__(self, house: Node, well: Node, weight: int) -> None:
         '''
         Parameters:
         ----------
@@ -112,7 +112,7 @@ class Edge():
             house node
         well : Node
             well node
-        weight : float
+        weight : int
             weight of the edge
         '''
         self.house = house
@@ -176,8 +176,8 @@ class Graph():
                  k: int, 
                  wells_coords: List[np.ndarray], 
                  houses_coords: List[np.ndarray],
-                 wells_labels: List[float] = None,
-                 houses_labels: List[float] = None,
+                 wells_labels: List[int] = None,
+                 houses_labels: List[int] = None,
                  empty_edges: bool = False) -> None:
         '''
         Parameters:
@@ -190,9 +190,9 @@ class Graph():
             list of coordinates of wells
         houses_coords : List[np.ndarray]
             list of coordinates of houses
-        wells_labels : List[float], optional
+        wells_labels : List[int], optional
             list of labels of wells
-        houses_labels : List[float], optional
+        houses_labels : List[int], optional
             list of labels of houses
         empty_edges : bool, optional
             flag indicating if the graph should be initialized without edges
