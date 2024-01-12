@@ -96,4 +96,3 @@ class Matching():
         '''
         self.edges = [edge for edge in self.edges if not (edge.house.idx == house.idx and edge.well.idx == well.idx)]
             
-            

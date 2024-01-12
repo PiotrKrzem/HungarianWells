@@ -60,7 +60,7 @@ def read_input(input_file) -> Graph:
         idx = 0
         for line in file:
             coordinates_str = line.split(",")
-            node_coordinates = [round(float(coordinates_str[0]), 2), round(float(coordinates_str[1]), 2)]
+            node_coordinates = [float(coordinates_str[0]), float(coordinates_str[1])]
             if idx < n:
                 wells_coordinates.append(node_coordinates)
             else:
