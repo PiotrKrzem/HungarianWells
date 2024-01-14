@@ -1,6 +1,8 @@
 from src.models.matching import Matching
+from src.models.graph import InitialGraph
 
-def write_to_output(matching: Matching, output_file: str):
+
+def write_to_output(graph: InitialGraph, matching: Matching, output_file: str):
     '''
     Method writes results of matching to indicated output file.
 
@@ -15,31 +17,31 @@ def write_to_output(matching: Matching, output_file: str):
         output = open(output_file, 'w')
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
-    
-    matching_wells_coords = list(set([(edge.well.x, edge.well.y) for edge in matching.edges]))
-    matching_wells = []
-    matching_houses = []
 
-    for edge in matching.edges:
-        if (edge.well.x, edge.well.y) in matching_wells_coords:
-            matching_wells.append(edge.well)
-            matching_wells_coords.remove((edge.well.x, edge.well.y))
+    total_cost = 0
+    for well in range(graph.n):
+        well_x, well_y = graph.wells_coordinates[well]
 
-    for well in matching_wells:
-        matching_houses.append([edge.house for edge in matching.edges if (edge.well.x, edge.well.y) == (well.x, well.y)])
+        well_duplicate_start = well * graph.k
+        well_duplicate_end = well_duplicate_start + graph.k
+        
+        
+        output.write(f"W{well + 1}({well_x},{well_y}) -> ")
 
-    well_idx, house_idx = 1, 1
-    for i in range(len(matching_wells)):
-        output.write(f"W{well_idx}({matching_wells[i].x},{matching_wells[i].y}) -> ")
-        well_idx += 1
-        for j in range(len(matching_houses[i])):
-            output.write(f"H{house_idx}({matching_houses[i][j].x},{matching_houses[i][j].y})")
-            house_idx += 1
-            if j < len(matching_houses[i]) - 1:
+        for well_duplicate in range(well_duplicate_start, well_duplicate_end):
+            house =  matching.matching_house[well_duplicate]
+            house_x, house_y = graph.houses_coordinates[house]
+            output.write(f"H{house + 1}({house_x},{house_y})")
+
+            total_cost += InitialGraph.distance(well_x, well_y, house_x, house_y)
+
+            if well_duplicate < well_duplicate_end - 1:
                 output.write(",")
+
         output.write("\n")
 
-    total_cost = -sum([edge.weight for edge in matching.edges])
+
+    total_cost = -total_cost
     output.write(f"Total Cost: {total_cost / 100}\n")
 
     output.close()

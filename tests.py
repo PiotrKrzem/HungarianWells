@@ -7,38 +7,36 @@ from src.helpers.output_handler import write_to_output
 from src.helpers.plot import save_output, save_time_complexity
 from src.helpers.plot import display_output, display_time_complexity
 
-RUN_SAFE = False
+MAX_N, MAX_K = 30, 30
+
 DISPLAY_OUTPUT_INSTEAD_OF_SAVE = False
 DISPLAY_COMPLEXITY_INSTEAD_OF_SAVE = True
+SMOOTH_TIME_COMPLEXITY = False
 
-MAX_N, MAX_K = 5, 5
-REPEAT_BENCHMARK_TIMES = 1
+REPEAT_BENCHMARK_TIMES = 10
+REGENERATE_ALL = True
 REGENERATE = [
-    # (2,2)
+    # (5,5)
 ]
 RUN_ONLY = [
-    (4,5)
+    # (30, 30)
 ]
 
 def test_hungarian(input_file):
-    if RUN_SAFE:
-        from src.hungarian import test_hungarian as _test_hungarian
-        return _test_hungarian(input_file)
-    else:
-        from src.hungarian import run_hungarian
-        return run_hungarian(input_file)
-    
+    from src.hungryryan import run_hungryryan
+    return run_hungryryan(input_file)
+
 def process_output(n, k, output_file, output_plot):
     if DISPLAY_OUTPUT_INSTEAD_OF_SAVE:
         return display_output(n, k, output_file)
     else:
         return save_output(n, k, output_file, output_plot)
 
-def process_time_complexity(n, k, measurements_grid, output_plot, logarithmic = False):
+def process_time_complexity(n, k, measurements_grid, output_plot, logarithmic = False, smoothed = False):
     if DISPLAY_COMPLEXITY_INSTEAD_OF_SAVE:
-        return display_time_complexity(n, k, measurements_grid, logarithmic)
+        return display_time_complexity(n, k, measurements_grid, logarithmic, smoothed)
     else:
-        return save_time_complexity(n, k, measurements_grid, output_plot, logarithmic)
+        return save_time_complexity(n, k, measurements_grid, output_plot, logarithmic, smoothed)
 
 def main():
     
@@ -93,13 +91,14 @@ def main():
                 input_file = f"./Tests/input_test_{n}_{k}.txt"
                 output_file = f"./Tests/output_test_{n}_{k}.txt"
                 print(f'N: {n}, K: {k}')
-                if REGENERATE.count((n, k)) or not os.path.exists(input_file) :
+                if REGENERATE_ALL or REGENERATE.count((n, k)) or not os.path.exists(input_file) :
                     print(f'Regenerating input N: {n}, K: {k}')
                     generate_input(n, k, input_file)
 
                 graph, matching = test_hungarian(input_file)
-                write_to_output(matching, output_file)
+                write_to_output(graph, matching, output_file)
                 process_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
+
 
     # BENCHMARKING
     print(f'Benchmark N: {MAX_N}, K: {MAX_K}')
@@ -117,11 +116,11 @@ def main():
                     lambda: test_hungarian(input_file),
                     number=1
                 )
-                measurements[n-1, k-1] = measurement * 100
+                measurements[n-1, k-1] = measurement
         full_measurements += measurements
     full_measurements = full_measurements / float(max(REPEAT_BENCHMARK_TIMES, 1))
-    process_time_complexity(n, k, measurements, f"{pictures}standard_benchmark.png", logarithmic=False)
-    process_time_complexity(n, k, measurements, f"{pictures}log_benchmark.png", logarithmic=True)
+    process_time_complexity(n, k, full_measurements, f"{pictures}standard_benchmark.png", logarithmic=False, smoothed=SMOOTH_TIME_COMPLEXITY)
+
 
 if __name__ == "__main__":
     main()

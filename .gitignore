@@ -3,3 +3,4 @@ output.txt
 *.png
 *.pyc
 Tests/*.txt
+Pictures/*.png
