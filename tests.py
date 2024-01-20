@@ -66,7 +66,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(n, k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     input_file = "./Tests/input_test_3.txt"
@@ -77,7 +77,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     input_file = "./Tests/input_test_4.txt"
@@ -88,7 +88,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
     # return
 
@@ -100,7 +100,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
 
     input_file = "./Tests/input_test_6.txt"
@@ -111,7 +111,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
     # return
 
@@ -123,7 +123,7 @@ def main():
     print(f'N: {n}, K: {k}')
     generate_input(n, k, input_file)
     graph, matching = test_hungarian(n, k, input_file, output_file)
-    write_to_output(matching, output_file)
+    write_to_output(matching, graph.wells, output_file)
     save_output(graph.n, graph.k, output_file, f"{pictures}n_{n}_k_{k}.png")
     # return
 

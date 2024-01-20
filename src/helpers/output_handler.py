@@ -1,6 +1,8 @@
+from src.models.graph import Node
 from src.models.matching import Matching
+from typing import List
 
-def write_to_output(matching: Matching, output_file: str):
+def write_to_output(matching: Matching, wells: List[Node], output_file: str):
     '''
     Method writes results of matching to indicated output file.
 
@@ -8,6 +10,8 @@ def write_to_output(matching: Matching, output_file: str):
     ----------
     matching : Matching
         resulting matching
+    wells : List[Node]
+        list of wells
     output_file : str
         name of the file to which the results are to be stores
     '''
@@ -16,25 +20,15 @@ def write_to_output(matching: Matching, output_file: str):
     except IOError:
         raise FileNotFoundError(f"Error: Unable to open output file {output_file}")
     
-    matching_wells_coords = list(set([(edge.well.x, edge.well.y) for edge in matching.edges]))
-    matching_wells = []
     matching_houses = []
 
-    for edge in matching.edges:
-        if (edge.well.x, edge.well.y) in matching_wells_coords:
-            matching_wells.append(edge.well)
-            matching_wells_coords.remove((edge.well.x, edge.well.y))
-
-    for well in matching_wells:
+    for well in wells:
         matching_houses.append([edge.house for edge in matching.edges if (edge.well.x, edge.well.y) == (well.x, well.y)])
 
-    well_idx, house_idx = 1, 1
-    for i in range(len(matching_wells)):
-        output.write(f"W{well_idx}({matching_wells[i].x},{matching_wells[i].y}) -> ")
-        well_idx += 1
+    for i in range(len(wells)):
+        output.write(f"W{wells[i].idx + 1}({wells[i].x},{wells[i].y}) -> ")
         for j in range(len(matching_houses[i])):
-            output.write(f"H{house_idx}({matching_houses[i][j].x},{matching_houses[i][j].y})")
-            house_idx += 1
+            output.write(f"H{matching_houses[i][j].idx + 1}({matching_houses[i][j].x},{matching_houses[i][j].y})")
             if j < len(matching_houses[i]) - 1:
                 output.write(",")
         output.write("\n")
