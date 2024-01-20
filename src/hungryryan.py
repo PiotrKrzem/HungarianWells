@@ -64,11 +64,12 @@ def find_root_of_alternating_path(graph: Graph, M: Matching):
     for well in range(graph.n):
         if M.matching_house[well] == UNMATCHED_NODE:
             graph.queue[graph.write] = well
+            root = well
+            graph.write = graph.write + 1
+
             graph.previous_well[well] = ROOT_NODE
             graph.S[well] = TRUE
 
-            root = well
-            graph.write = graph.write + 1
             break
 
     return root
@@ -99,8 +100,8 @@ def find_augmenting_path(graph: Graph, matching: Matching) -> Tuple[int, int, bo
                     return well, house, True 
                 graph.T[house] = TRUE
                 graph.queue[graph.write] = matching.matching_well[house]
-                graph.add_to_alternating_tree(matching.matching_well[house], well)
                 graph.write = graph.write + 1
+                graph.add_to_alternating_tree(matching.matching_well[house], well)
 
     return UNKNOWN_NODE, UNKNOWN_NODE, False
 
@@ -127,13 +128,15 @@ def label_modification(graph: Graph) -> Graph:
             delta = min(delta, graph.slack[house])
 
     for well in range(graph.n):
-        if graph.S[well]:
+        if graph.S[well] == TRUE:
             graph.label_well[well] -= delta
 
     for house in range(graph.n):
         if graph.T[house] == TRUE:
             graph.label_house[house] += delta
-        else:
+
+    for house in range(graph.n):
+        if graph.T[house] == FALSE:
             graph.slack[house] -= delta
 
     return graph
@@ -212,7 +215,7 @@ def refine_augmenting_tree_with_new_edges(graph: Graph, matching: Matching) -> T
                 return well, house, True
             else:
                 graph.T[house] = TRUE  # else just add y to T
-                if  graph.S[matching.matching_well[house]]:
+                if graph.S[matching.matching_well[house]] == FALSE:
                     graph.queue[graph.write] = matching.matching_well[house]
                     graph.write += 1
                     graph.add_to_alternating_tree(matching.matching_well[house], graph.slack_matching_well[house])  # and add edges (x, y) and (y, yx[y]) to the tree
@@ -234,6 +237,7 @@ def run_hungryryan(input_file: str) -> Tuple[Graph, Matching]:
     -------
     Optimal matching.
     '''
+    ret = 0
     # Step 0: Read and construct graph based on the input file
     initial_graph = read_input(input_file)
 
@@ -274,4 +278,7 @@ def run_hungryryan(input_file: str) -> Tuple[Graph, Matching]:
             # Step 10: Matching modification
             M = matching_modification(last_well_in_path, last_house_in_path, duplicate_graph, M)
 
+    for x in range(graph_l.n):
+        ret += graph_l.cost_matrix[x][M.matching_house[x]]
+    print(ret)
     return initial_graph, M

@@ -24,8 +24,7 @@ def write_to_output(graph: InitialGraph, matching: Matching, output_file: str):
 
         well_duplicate_start = well * graph.k
         well_duplicate_end = well_duplicate_start + graph.k
-        
-        
+
         output.write(f"W{well + 1}({well_x},{well_y}) -> ")
 
         for well_duplicate in range(well_duplicate_start, well_duplicate_end):
@@ -33,15 +32,13 @@ def write_to_output(graph: InitialGraph, matching: Matching, output_file: str):
             house_x, house_y = graph.houses_coordinates[house]
             output.write(f"H{house + 1}({house_x},{house_y})")
 
-            total_cost += InitialGraph.distance(well_x, well_y, house_x, house_y)
+            total_cost += InitialGraph.precise_distance(well_x, well_y, house_x, house_y)
 
             if well_duplicate < well_duplicate_end - 1:
                 output.write(",")
 
         output.write("\n")
 
-
-    total_cost = -total_cost
-    output.write(f"Total Cost: {total_cost / 100}\n")
+    output.write(f"Total Cost: {total_cost}\n")
 
     output.close()

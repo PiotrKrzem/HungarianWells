@@ -53,7 +53,11 @@ class InitialGraph:
 
     @staticmethod
     def distance(well_x, well_y, house_x, house_y) -> int:
-        return -int(round(math.dist([well_x, well_y], [house_x, house_y]), 2) * 100)
+        return int(round(math.dist([well_x, well_y], [house_x, house_y]), 2) * 100)
+    
+    @staticmethod
+    def precise_distance(well_x, well_y, house_x, house_y) -> float:
+        return round(math.dist([well_x, well_y], [house_x, house_y]), 6)
 
 class Graph(InitialGraph):
     '''
@@ -107,6 +111,8 @@ class Graph(InitialGraph):
                 well_x, well_y = self.wells_coordinates[well]
                 house_x, house_y = self.houses_coordinates[house]
                 self.cost_matrix[well][house] = InitialGraph.distance(well_x, well_y, house_x, house_y)
+
+        self.cost_matrix = self.cost_matrix.max() - self.cost_matrix
 
     def initial_labeling(self):
         for well in range(self.n):
