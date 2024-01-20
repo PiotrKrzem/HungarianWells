@@ -5,6 +5,8 @@ import matplotlib.ticker as mticker
 
 from matplotlib.colors import ListedColormap
 
+from src.models.graph import InitialGraph
+
 def exponential_cmap(base_cmap=None, colors_count = 256):
     base = plt.cm.get_cmap(base_cmap)
     color_list = base(np.linspace(0, 1, colors_count))
@@ -147,9 +149,9 @@ def create_input_plot(input_file):
 
         # Connect each house to every well with a line and label the distance
         for _, (well_x, well_y) in wells.items():
-            distance = ((house_x - well_x)**2 + (house_y - well_y)**2)**0.5
+            distance = InitialGraph.precise_distance(well_x, well_y, house_x, house_y)
             axis.plot([house_x, well_x], [house_y, well_y], linestyle='--', color='black')
-            axis.text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.2f}', ha='center', va='center')
+            axis.text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.6f}', ha='center', va='center')
 
     plt.tight_layout()
 
@@ -194,9 +196,9 @@ def create_output_plot(n, k, output_file):
 
         # Connect each house to every well with a line and label the distance
         for _, (well_x, well_y) in wells.items():
-            distance = ((house_x - well_x)**2 + (house_y - well_y)**2)**0.5
+            distance = InitialGraph.precise_distance(well_x, well_y, house_x, house_y)
             axs[0].plot([house_x, well_x], [house_y, well_y], linestyle='--', color='black')
-            axs[0].text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.2f}', ha='center', va='center')
+            axs[0].text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.6f}', ha='center', va='center')
 
     # Right subplot
     axs[1].set_title("Output")
@@ -215,9 +217,9 @@ def create_output_plot(n, k, output_file):
         for house_well_pair in house_well_map:
             if house_well_pair[0] == house_name:
                 well_x, well_y = wells[house_well_pair[1]]
-                distance = ((house_x - well_x)**2 + (house_y - well_y)**2)**0.5
+                distance = InitialGraph.precise_distance(well_x, well_y, house_x, house_y)
                 axs[1].plot([house_x, well_x], [house_y, well_y], linestyle='-', color='red')
-                axs[1].text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.2f}', ha='center', va='center')
+                axs[1].text((house_x + well_x) / 2, (house_y + well_y) / 2, f'{distance:.6f}', ha='center', va='center')
                 break
 
     plt.tight_layout()
